@@ -1,8 +1,6 @@
 PODS:
   - DHPasscodeManager (0.9.0):
-    - DHPasscodeManager/Core (= 0.9.0)
-  - DHPasscodeManager/Core (0.9.0):
-    - ReactiveCocoa
+    - ReactiveCocoa (= 2.3.1)
     - SSKeychain
   - ReactiveCocoa (2.3.1):
     - ReactiveCocoa/UI (= 2.3.1)
@@ -14,14 +12,14 @@ PODS:
   - SSKeychain (1.2.2)
 
 DEPENDENCIES:
-  - DHPasscodeManager (from `../`)
+  - DHPasscodeManager (from `https://github.com/donholly/DHPasscodeManager`)
 
 EXTERNAL SOURCES:
   DHPasscodeManager:
-    :path: ../
+    :git: https://github.com/donholly/DHPasscodeManager
 
 SPEC CHECKSUMS:
-  DHPasscodeManager: 40aa715df4795c8c25c8abb59f84fde55dc75286
+  DHPasscodeManager: 3edee6b735c2e5872fe3775cd6c7342a16a0cbde
   ReactiveCocoa: dca75777b9d18990c8714a3a6f2149f29b4d1462
   SSKeychain: cc48bd3ad24fcd9125adb9e0d23dd50b8bbd08b9
 
