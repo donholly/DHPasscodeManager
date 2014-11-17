@@ -27,7 +27,7 @@ Pod::Spec.new do |s|
   s.requires_arc = true
 
   s.source       = { :git => "https://github.com/donholly/DHPasscodeManager.git" }
-  s.source_files = "**/*.{h,m}"
+  s.source_files = "DHPasscode*.{h,m}"
 
   s.dependency "SSKeychain"
   s.dependency "ReactiveCocoa", "2.3.1"
