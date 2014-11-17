@@ -15,11 +15,6 @@
 		F64462D71A193C2100DE8725 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F64462D61A193C2100DE8725 /* Images.xcassets */; };
 		F64462DA1A193C2100DE8725 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = F64462D81A193C2100DE8725 /* LaunchScreen.xib */; };
 		F64462E61A193C2100DE8725 /* DHPasscodeManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F64462E51A193C2100DE8725 /* DHPasscodeManagerTests.m */; };
-		F64462F31A193C6300DE8725 /* DHPasscodeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F64462F21A193C6300DE8725 /* DHPasscodeManager.m */; };
-		F64462F61A193C7800DE8725 /* DHPasscodeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F64462F51A193C7800DE8725 /* DHPasscodeViewController.m */; };
-		F6E3E6311A194EAB00D7C120 /* DHPasscodeDotView.m in Sources */ = {isa = PBXBuildFile; fileRef = F6E3E6301A194EAB00D7C120 /* DHPasscodeDotView.m */; };
-		F6E3E6341A19505600D7C120 /* DHPasscodeButton.m in Sources */ = {isa = PBXBuildFile; fileRef = F6E3E6331A19505600D7C120 /* DHPasscodeButton.m */; };
-		F6E3E6371A19551C00D7C120 /* DHPasscodeManagerStyle.m in Sources */ = {isa = PBXBuildFile; fileRef = F6E3E6361A19551C00D7C120 /* DHPasscodeManagerStyle.m */; };
 		F6E3E63A1A19767000D7C120 /* lock.png in Resources */ = {isa = PBXBuildFile; fileRef = F6E3E6381A19767000D7C120 /* lock.png */; };
 		F6E3E63B1A19767000D7C120 /* lock@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F6E3E6391A19767000D7C120 /* lock@2x.png */; };
 /* End PBXBuildFile section */
@@ -51,16 +46,6 @@
 		F64462DF1A193C2100DE8725 /* DHPasscodeManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DHPasscodeManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F64462E41A193C2100DE8725 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F64462E51A193C2100DE8725 /* DHPasscodeManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DHPasscodeManagerTests.m; sourceTree = "<group>"; };
-		F64462F11A193C6300DE8725 /* DHPasscodeManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DHPasscodeManager.h; path = util/DHPasscodeManager.h; sourceTree = "<group>"; };
-		F64462F21A193C6300DE8725 /* DHPasscodeManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DHPasscodeManager.m; path = util/DHPasscodeManager.m; sourceTree = "<group>"; };
-		F64462F41A193C7800DE8725 /* DHPasscodeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DHPasscodeViewController.h; path = controller/DHPasscodeViewController.h; sourceTree = "<group>"; };
-		F64462F51A193C7800DE8725 /* DHPasscodeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DHPasscodeViewController.m; path = controller/DHPasscodeViewController.m; sourceTree = "<group>"; };
-		F6E3E62F1A194EAB00D7C120 /* DHPasscodeDotView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DHPasscodeDotView.h; path = view/DHPasscodeDotView.h; sourceTree = "<group>"; };
-		F6E3E6301A194EAB00D7C120 /* DHPasscodeDotView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DHPasscodeDotView.m; path = view/DHPasscodeDotView.m; sourceTree = "<group>"; };
-		F6E3E6321A19505600D7C120 /* DHPasscodeButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DHPasscodeButton.h; path = view/DHPasscodeButton.h; sourceTree = "<group>"; };
-		F6E3E6331A19505600D7C120 /* DHPasscodeButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DHPasscodeButton.m; path = view/DHPasscodeButton.m; sourceTree = "<group>"; };
-		F6E3E6351A19551C00D7C120 /* DHPasscodeManagerStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DHPasscodeManagerStyle.h; path = view/DHPasscodeManagerStyle.h; sourceTree = "<group>"; };
-		F6E3E6361A19551C00D7C120 /* DHPasscodeManagerStyle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DHPasscodeManagerStyle.m; path = view/DHPasscodeManagerStyle.m; sourceTree = "<group>"; };
 		F6E3E6381A19767000D7C120 /* lock.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = lock.png; sourceTree = SOURCE_ROOT; };
 		F6E3E6391A19767000D7C120 /* lock@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "lock@2x.png"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -126,9 +111,6 @@
 			children = (
 				F6E3E6381A19767000D7C120 /* lock.png */,
 				F6E3E6391A19767000D7C120 /* lock@2x.png */,
-				F6E3E62E1A194E8100D7C120 /* view */,
-				F64462F01A193C4200DE8725 /* controller */,
-				F64462EF1A193C3500DE8725 /* util */,
 				F64462CD1A193C2100DE8725 /* AppDelegate.h */,
 				F64462CE1A193C2100DE8725 /* AppDelegate.m */,
 				F64462D01A193C2100DE8725 /* ViewController.h */,
@@ -165,37 +147,6 @@
 				F64462E41A193C2100DE8725 /* Info.plist */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		F64462EF1A193C3500DE8725 /* util */ = {
-			isa = PBXGroup;
-			children = (
-				F64462F11A193C6300DE8725 /* DHPasscodeManager.h */,
-				F64462F21A193C6300DE8725 /* DHPasscodeManager.m */,
-			);
-			name = util;
-			sourceTree = "<group>";
-		};
-		F64462F01A193C4200DE8725 /* controller */ = {
-			isa = PBXGroup;
-			children = (
-				F64462F41A193C7800DE8725 /* DHPasscodeViewController.h */,
-				F64462F51A193C7800DE8725 /* DHPasscodeViewController.m */,
-			);
-			name = controller;
-			sourceTree = "<group>";
-		};
-		F6E3E62E1A194E8100D7C120 /* view */ = {
-			isa = PBXGroup;
-			children = (
-				F6E3E62F1A194EAB00D7C120 /* DHPasscodeDotView.h */,
-				F6E3E6301A194EAB00D7C120 /* DHPasscodeDotView.m */,
-				F6E3E6321A19505600D7C120 /* DHPasscodeButton.h */,
-				F6E3E6331A19505600D7C120 /* DHPasscodeButton.m */,
-				F6E3E6351A19551C00D7C120 /* DHPasscodeManagerStyle.h */,
-				F6E3E6361A19551C00D7C120 /* DHPasscodeManagerStyle.m */,
-			);
-			name = view;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -335,14 +286,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F6E3E6311A194EAB00D7C120 /* DHPasscodeDotView.m in Sources */,
 				F64462D21A193C2100DE8725 /* ViewController.m in Sources */,
 				F64462CF1A193C2100DE8725 /* AppDelegate.m in Sources */,
 				F64462CC1A193C2100DE8725 /* main.m in Sources */,
-				F64462F61A193C7800DE8725 /* DHPasscodeViewController.m in Sources */,
-				F6E3E6371A19551C00D7C120 /* DHPasscodeManagerStyle.m in Sources */,
-				F6E3E6341A19505600D7C120 /* DHPasscodeButton.m in Sources */,
-				F64462F31A193C6300DE8725 /* DHPasscodeManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
