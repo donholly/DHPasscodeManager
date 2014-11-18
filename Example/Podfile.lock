@@ -12,14 +12,14 @@ PODS:
   - SSKeychain (1.2.2)
 
 DEPENDENCIES:
-  - DHPasscodeManager (from `https://github.com/donholly/DHPasscodeManager`)
+  - DHPasscodeManager (from `../`)
 
 EXTERNAL SOURCES:
   DHPasscodeManager:
-    :git: https://github.com/donholly/DHPasscodeManager
+    :path: ../
 
 SPEC CHECKSUMS:
-  DHPasscodeManager: 54329d111bc66d27d85a36e23dded8d12ebac8ce
+  DHPasscodeManager: 653106dccd49884128321d489e604a922462784c
   ReactiveCocoa: dca75777b9d18990c8714a3a6f2149f29b4d1462
   SSKeychain: cc48bd3ad24fcd9125adb9e0d23dd50b8bbd08b9
 

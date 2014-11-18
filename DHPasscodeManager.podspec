@@ -32,6 +32,8 @@ Pod::Spec.new do |s|
   s.dependency "SSKeychain"
   s.dependency "ReactiveCocoa", "2.3.1"
 
+  s.framework    = 'LocalAuthentication'
+
   s.xcconfig = { 'OTHER_LDFLAGS' => '-ObjC -all_load' }
 
 end

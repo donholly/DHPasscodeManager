@@ -3,7 +3,8 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '7.0'
 
 target 'DHPasscodeManagerExample' do
-pod 'DHPasscodeManager', :git => 'https://github.com/donholly/DHPasscodeManager'
+pod 'DHPasscodeManager', :path => '../'
+#pod 'DHPasscodeManager', :git => 'https://github.com/donholly/DHPasscodeManager'
 end
 
 target 'DHPasscodeManagerTests' do

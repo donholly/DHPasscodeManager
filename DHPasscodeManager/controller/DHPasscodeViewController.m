@@ -8,10 +8,11 @@
 
 #import "DHPasscodeViewController.h"
 
+#import "DHPasscodeManager.h"
 #import "DHPasscodeDotView.h"
 #import "DHPasscodeButton.h"
 
-#import <ReactiveCocoa/ReactiveCocoa.h>
+#import <AudioToolbox/AudioServices.h>
 
 #define DH_PASSCODE_BUTTON_SIZE 60.0f
 #define DH_PASSCODE_BUTTON_SPACING_X 25.0f
@@ -22,6 +23,10 @@
 
 #define DH_PASSCODE_SPACING 10.0f
 
+#define DH_PASSCODE_DELIMITER @"-"
+
+#define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE [[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"] stringByAppendingString:@"_passcode"]
+
 // Changing this would break things right now
 // TODO: support variable length passcodes one day?
 #define DH_PASSCODE_LENGTH 4
@@ -31,11 +36,13 @@
 
 @property (nonatomic, strong) UILabel *instructionsLabel;
 
+@property (nonatomic, strong) NSMutableOrderedSet *dotViews;
 @property (nonatomic, strong) DHPasscodeDotView *dotView0;
 @property (nonatomic, strong) DHPasscodeDotView *dotView1;
 @property (nonatomic, strong) DHPasscodeDotView *dotView2;
 @property (nonatomic, strong) DHPasscodeDotView *dotView3;
 
+@property (nonatomic, strong) NSMutableOrderedSet *passcodeButtons;
 @property (nonatomic, strong) DHPasscodeButton *passcodeButton0;
 @property (nonatomic, strong) DHPasscodeButton *passcodeButton1;
 @property (nonatomic, strong) DHPasscodeButton *passcodeButton2;
@@ -48,7 +55,9 @@
 @property (nonatomic, strong) DHPasscodeButton *passcodeButton9;
 @property (nonatomic, strong) UIButton *cancelButton;
 
-@property (nonatomic, strong) NSMutableArray *currentInput;
+@property (nonatomic, strong) NSMutableArray *firstInput;
+@property (nonatomic, strong) NSMutableArray *secondInput;
+@property (nonatomic, strong) NSMutableArray *thirdInput;
 
 @end
 
@@ -58,15 +67,24 @@
     [self removeStyleObservers];
 }
 
-- (id)init {
-    if (self = [super init]) {
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
         
         // default to a verify passcode
-        self.type = DHPasscodeViewControllerTypeVerify;
+        self.type = DHPasscodeViewControllerTypeAuthenticate;
         
-        self.currentInput = @[].mutableCopy;
+        self.firstInput = @[].mutableCopy;
+        self.secondInput = @[].mutableCopy;
+        self.thirdInput = @[].mutableCopy;
+        
+        self.dotViews = [NSMutableOrderedSet orderedSet];
+        self.passcodeButtons = [NSMutableOrderedSet orderedSet];
     }
     return self;
+}
+
+- (NSUInteger)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskPortrait;
 }
 
 - (void)loadView {
@@ -86,63 +104,86 @@
     
     // Dots
     self.dotView0 = [[DHPasscodeDotView alloc] initWithFrame:CGRectZero];
+    [self.dotViews addObject:self.dotView0];
     [self.view addSubview:self.dotView0];
     
     self.dotView1 = [[DHPasscodeDotView alloc] initWithFrame:CGRectZero];
+    [self.dotViews addObject:self.dotView1];
     [self.view addSubview:self.dotView1];
     
     self.dotView2 = [[DHPasscodeDotView alloc] initWithFrame:CGRectZero];
+    [self.dotViews addObject:self.dotView2];
     [self.view addSubview:self.dotView2];
     
     self.dotView3 = [[DHPasscodeDotView alloc] initWithFrame:CGRectZero];
+    [self.dotViews addObject:self.dotView3];
     [self.view addSubview:self.dotView3];
     
     // Buttons
     self.passcodeButton0 = [[DHPasscodeButton alloc] initWithFrame:CGRectZero number:@(0)];
-    [self.passcodeButton0 addTarget:self action:@selector(didTapNumber:) forControlEvents:UIControlEventTouchUpInside];
+    [self.passcodeButtons addObject:self.passcodeButton0];
     [self.view addSubview:self.passcodeButton0];
     
     self.passcodeButton1 = [[DHPasscodeButton alloc] initWithFrame:CGRectZero number:@(1)];
-    [self.passcodeButton1 addTarget:self action:@selector(didTapNumber:) forControlEvents:UIControlEventTouchUpInside];
+    [self.passcodeButtons addObject:self.passcodeButton1];
     [self.view addSubview:self.passcodeButton1];
     
     self.passcodeButton2 = [[DHPasscodeButton alloc] initWithFrame:CGRectZero number:@(2)];
-    [self.passcodeButton2 addTarget:self action:@selector(didTapNumber:) forControlEvents:UIControlEventTouchUpInside];
+    [self.passcodeButtons addObject:self.passcodeButton2];
     [self.view addSubview:self.passcodeButton2];
     
     self.passcodeButton3 = [[DHPasscodeButton alloc] initWithFrame:CGRectZero number:@(3)];
-    [self.passcodeButton3 addTarget:self action:@selector(didTapNumber:) forControlEvents:UIControlEventTouchUpInside];
+    [self.passcodeButtons addObject:self.passcodeButton3];
     [self.view addSubview:self.passcodeButton3];
     
     self.passcodeButton4 = [[DHPasscodeButton alloc] initWithFrame:CGRectZero number:@(4)];
-    [self.passcodeButton4 addTarget:self action:@selector(didTapNumber:) forControlEvents:UIControlEventTouchUpInside];
+    [self.passcodeButtons addObject:self.passcodeButton4];
     [self.view addSubview:self.passcodeButton4];
     
     self.passcodeButton5 = [[DHPasscodeButton alloc] initWithFrame:CGRectZero number:@(5)];
-    [self.passcodeButton5 addTarget:self action:@selector(didTapNumber:) forControlEvents:UIControlEventTouchUpInside];
+    [self.passcodeButtons addObject:self.passcodeButton5];
     [self.view addSubview:self.passcodeButton5];
     
     self.passcodeButton6 = [[DHPasscodeButton alloc] initWithFrame:CGRectZero number:@(6)];
-    [self.passcodeButton6 addTarget:self action:@selector(didTapNumber:) forControlEvents:UIControlEventTouchUpInside];
+    [self.passcodeButtons addObject:self.passcodeButton6];
     [self.view addSubview:self.passcodeButton6];
     
     self.passcodeButton7 = [[DHPasscodeButton alloc] initWithFrame:CGRectZero number:@(7)];
-    [self.passcodeButton7 addTarget:self action:@selector(didTapNumber:) forControlEvents:UIControlEventTouchUpInside];
+    [self.passcodeButtons addObject:self.passcodeButton7];
     [self.view addSubview:self.passcodeButton7];
     
     self.passcodeButton8 = [[DHPasscodeButton alloc] initWithFrame:CGRectZero number:@(8)];
-    [self.passcodeButton8 addTarget:self action:@selector(didTapNumber:) forControlEvents:UIControlEventTouchUpInside];
+    [self.passcodeButtons addObject:self.passcodeButton8];
     [self.view addSubview:self.passcodeButton8];
     
     self.passcodeButton9 = [[DHPasscodeButton alloc] initWithFrame:CGRectZero number:@(9)];
-    [self.passcodeButton9 addTarget:self action:@selector(didTapNumber:) forControlEvents:UIControlEventTouchUpInside];
+    [self.passcodeButtons addObject:self.passcodeButton9];
     [self.view addSubview:self.passcodeButton9];
     
     self.cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    
-    [self.cancelButton setTitle:NSLocalizedString(@"Cancel", @"Cancel") forState:UIControlStateNormal];
-    [self.cancelButton addTarget:self action:@selector(didTapCancel:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.cancelButton];
+    
+    [self setupSignals];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+    [self resetInput];
+    
+    if (self.passcodeManager.touchIDEnabled) {
+        [self presentTouchIdWithCompletionBlock:^(BOOL success, NSError *error) {
+            
+            if (self.completionBlock) {
+                self.completionBlock(self, success, error);
+            }
+            
+        }];
+    }
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -248,6 +289,330 @@
                                          DH_PASSCODE_BUTTON_SIZE);
 }
 
+- (void)presentTouchIdWithCompletionBlock:(void (^)(BOOL success, NSError *error))completionBlock {
+    
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
+    LAContext *context = [[LAContext alloc] init];
+    
+    [context evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
+            localizedReason:NSLocalizedString(@"Unlock Access", @"Unlock Access")
+                      reply:^(BOOL success, NSError *error) {
+                          dispatch_async(dispatch_get_main_queue(), ^{
+                              if (completionBlock) {
+                                  completionBlock(success, error);
+                              }
+                          });
+                      }];
+#else
+    if (completionBlock) {
+        completionBlock(NO);
+    }
+#endif
+}
+
+- (void)setupSignals {
+
+    @weakify(self)
+    
+    RACSignal *typeSignal = RACObserve(self, type);
+    RACSignal *firstInputSignal = RACObserve(self, firstInput);
+    RACSignal *secondInputSignal = RACObserve(self, secondInput);
+    RACSignal *thirdInputSignal = RACObserve(self, thirdInput);
+    
+    RAC(self.instructionsLabel, text) =
+    [[[RACSignal
+       combineLatest:@[typeSignal, firstInputSignal, secondInputSignal, thirdInputSignal]
+       reduce:^id (NSNumber *type, NSArray *firstInput, NSArray *secondInput, NSArray *thirdInput) {
+           @strongify(self)
+           
+           if (type.integerValue != DHPasscodeViewControllerTypeCreateNew &&
+               firstInput.count == DH_PASSCODE_LENGTH &&
+               ![self passcodeEntryIsValid:firstInput]) {
+               return NSLocalizedString(@"Invalid passcode", @"Invalid passcode");
+           }
+           
+           switch (type.integerValue) {
+               case DHPasscodeViewControllerTypeAuthenticate:
+                   return self.instructionsLabel.text = NSLocalizedString(@"Enter your passcode", @"Enter your passcode");
+               case DHPasscodeViewControllerTypeCreateNew: {
+                   
+                   if (firstInput.count == DH_PASSCODE_LENGTH) {
+                       return NSLocalizedString(@"Re-enter the same passcode", @"Re-enter the same passcode");
+                   } else {
+                       return NSLocalizedString(@"Enter a new passcode", @"Enter a new passcode");
+                   }
+               }
+               case DHPasscodeViewControllerTypeChangeExisting: {
+                   
+                   if (firstInput.count == DH_PASSCODE_LENGTH) {
+                       if (secondInput.count == DH_PASSCODE_LENGTH) {
+                           return NSLocalizedString(@"Re-enter the same passcode", @"Re-enter the same passcode");
+                       } else {
+                           return NSLocalizedString(@"Enter a new passcode", @"Enter a new passcode");
+                       }
+                   } else {
+                       return NSLocalizedString(@"Enter your current passcode", @"Enter your current passcode");
+                   }
+               }
+               case DHPasscodeViewControllerTypeRemove:
+                   return NSLocalizedString(@"Enter your current passcode to disable", @"Enter your current passcode to disable");
+               default:
+                   NSLog(@"Unknown DHPasscodeViewControllerType: %@", type);
+                   return nil;
+           }
+           
+       }] doNext:^(id x) {
+           dispatch_async(dispatch_get_main_queue(), ^{
+               [self.view setNeedsLayout];
+           });
+       }] deliverOn:RACScheduler.mainThreadScheduler];
+    
+    
+    
+    [[RACSignal combineLatest:@[typeSignal, firstInputSignal, secondInputSignal, thirdInputSignal]] subscribeNext:^(RACTuple *tuple) {
+        @strongify(self)
+        
+        NSMutableArray *currentInput = [self currentInput];
+        
+        if (currentInput.count > 0) {
+            [self.cancelButton setTitle:NSLocalizedString(@"Clear", @"Clear") forState:UIControlStateNormal];
+        } else {
+            [self.cancelButton setTitle:NSLocalizedString(@"Cancel", @"Cancel") forState:UIControlStateNormal];
+        }
+    }];
+    
+    [self.passcodeButtons enumerateObjectsUsingBlock:^(DHPasscodeButton *button, NSUInteger idx, BOOL *stop) {
+        button.rac_command = [[RACCommand alloc] initWithSignalBlock:^(id _) {
+            @strongify(self)
+            
+            if (self.firstInput.count < DH_PASSCODE_LENGTH) {
+                [[self mutableArrayValueForKey:@"firstInput"] addObject:@(button.tag)];
+            } else if (self.secondInput.count < DH_PASSCODE_LENGTH) {
+                [[self mutableArrayValueForKey:@"secondInput"] addObject:@(button.tag)];
+            } else if (self.thirdInput.count < DH_PASSCODE_LENGTH) {
+                [[self mutableArrayValueForKey:@"thirdInput"] addObject:@(button.tag)];
+            }
+            
+            return [RACSignal empty];
+        }];
+    }];
+    
+    RAC(self.cancelButton, hidden) =
+    [RACSignal combineLatest:@[typeSignal, firstInputSignal, secondInputSignal, thirdInputSignal] reduce:^id (NSNumber *type, NSArray *firstInput, NSArray *secondInput, NSArray *thirdInput) {
+        
+        if (type.integerValue == DHPasscodeViewControllerTypeAuthenticate) {
+            return @(!(firstInput.count > 0 || secondInput.count > 0));
+        }
+        
+        return @NO;
+    }];
+    
+    self.cancelButton.rac_command = [[RACCommand alloc] initWithSignalBlock:^(id _) {
+        @strongify(self)
+        
+        if (self.firstInput.count > 0 || self.secondInput.count > 0) {
+            [self resetInput];
+        } else {
+            
+            // can only cancel if not authenticating
+            if (self.type != DHPasscodeViewControllerTypeAuthenticate) {
+                if (self.completionBlock) {
+                    self.completionBlock(self, NO, nil);
+                }
+            }
+        }
+        
+        return [RACSignal empty];
+    }];
+    
+    [[RACSignal combineLatest:@[typeSignal, firstInputSignal, secondInputSignal, thirdInputSignal]] subscribeNext:^(RACTuple *tuple) {
+        @strongify(self)
+        
+        // Dots
+        
+        NSMutableArray *lastInput = self.lastInput;
+        NSMutableArray *currentInput = self.currentInput;
+        
+        [self.dotViews enumerateObjectsUsingBlock:^(DHPasscodeDotView *dotView, NSUInteger idx, BOOL *stop) {
+            dotView.filled = lastInput.count > idx;
+        }];
+        
+        if (lastInput.count == DH_PASSCODE_LENGTH) {
+            [self enablePasscodeButtons:NO];
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                [self.dotViews enumerateObjectsUsingBlock:^(DHPasscodeDotView *dotView, NSUInteger idx, BOOL *stop) {
+                    dotView.filled = currentInput.count > idx;
+                }];
+                [self enablePasscodeButtons:YES];
+            });
+        }
+        
+        // Input Validation
+        NSString *firstInput = [tuple.second componentsJoinedByString:DH_PASSCODE_DELIMITER];
+        NSString *secondInput = [tuple.third componentsJoinedByString:DH_PASSCODE_DELIMITER];
+        BOOL firstInputIsValid = NO;
+        
+        if ([tuple.second count] == DH_PASSCODE_LENGTH) {
+            firstInputIsValid = [self passcodeEntryIsValid:tuple.second];
+            if (!firstInputIsValid) {
+                if ([tuple.first integerValue] == DHPasscodeViewControllerTypeAuthenticate ||
+                    [tuple.first integerValue] == DHPasscodeViewControllerTypeChangeExisting ||
+                    [tuple.first integerValue] == DHPasscodeViewControllerTypeRemove) {
+                    
+                    // Bad password
+                    NSLog(@"Invalid passcode: %@ != %@", firstInput, self.currentPasscodeString);
+                    
+                    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+                    
+                    [self enablePasscodeButtons:NO];
+                    [self shakeInvalidWithCompletionBlock:^{
+                        [self resetInput];
+                        [self enablePasscodeButtons:YES];
+                    }];
+                    
+                    return;
+                }
+                
+            } else {
+                
+                if ([tuple.first integerValue] == DHPasscodeViewControllerTypeAuthenticate ||
+                    [tuple.first integerValue] == DHPasscodeViewControllerTypeRemove) {
+                    
+                    if ([tuple.first integerValue] == DHPasscodeViewControllerTypeAuthenticate) {
+
+                        NSLog(@"Authenticated with passcode");
+                        
+                        if (self.completionBlock) {
+                            self.completionBlock(self, YES, nil);
+                        }
+                        
+                    } else if ([tuple.first integerValue] == DHPasscodeViewControllerTypeRemove) {
+                        
+                        NSLog(@"Disabling passcode");
+                        
+                        NSError *removePasscodeError;
+                        BOOL removed = [SSKeychain deletePasswordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                                      error:&removePasscodeError];
+                        
+                        if (removePasscodeError) {
+                            NSLog(@"Error removing passcode: %@", removePasscodeError);
+                        }
+                        
+                        if (self.completionBlock) {
+                            self.completionBlock(self, removed, removePasscodeError);
+                        }
+                    }
+                    
+                    [self resetInput];
+                    
+                    return;
+                }
+            }
+        }
+        
+        if ([tuple.first integerValue] == DHPasscodeViewControllerTypeCreateNew) {
+            
+            if ([tuple.second count] == DH_PASSCODE_LENGTH && [tuple.third count] == DH_PASSCODE_LENGTH) {
+                
+                __block BOOL passcodesMatch = YES;
+                [tuple.second enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                    if (obj != tuple.third[idx]) {
+                        passcodesMatch = NO;
+                        *stop = YES;
+                    }
+                }];
+                
+                if (passcodesMatch) {
+                    NSLog(@"Creating passcode");
+                    
+                    NSError *createPasscodeError;
+                    BOOL created = [SSKeychain setPassword:firstInput
+                                                forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                                   account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                     error:&createPasscodeError];
+                    
+                    if (createPasscodeError) {
+                        NSLog(@"Error creating passcode: %@", createPasscodeError);
+                    }
+                    
+                    if (self.completionBlock) {
+                        self.completionBlock(self, created, createPasscodeError);
+                    }
+                    
+                    [self resetInput];
+                    
+                    return;
+                    
+                } else {
+                    NSLog(@"Passwords don't match - resetting");
+                    [self enablePasscodeButtons:NO];
+                    [self shakeInvalidWithCompletionBlock:^{
+                        [self resetInput];
+                        [self enablePasscodeButtons:YES];
+                    }];
+                }
+            }
+        }
+        
+        if (firstInputIsValid && [tuple.first integerValue] == DHPasscodeViewControllerTypeChangeExisting) {
+            
+            if ([tuple.third count] == DH_PASSCODE_LENGTH && [tuple.fourth count] == DH_PASSCODE_LENGTH) {
+                
+                __block BOOL passcodesMatch = YES;
+                [tuple.third enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                    if (obj != tuple.fourth[idx]) {
+                        passcodesMatch = NO;
+                        *stop = YES;
+                    }
+                }];
+                
+                if (passcodesMatch) {
+                    NSLog(@"Changing passcode");
+                    
+                    NSError *changePasscodeError;
+                    BOOL changed = [SSKeychain setPassword:secondInput
+                                                forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                                   account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                     error:&changePasscodeError];
+                    
+                    if (changePasscodeError) {
+                        NSLog(@"Error changing passcode: %@", changePasscodeError);
+                    }
+                    
+                    if (self.completionBlock) {
+                        self.completionBlock(self, changed, changePasscodeError);
+                    }
+                    
+                    [self resetInput];
+                    
+                    return;
+                    
+                } else {
+                    NSLog(@"Passwords don't match - resetting");
+                    [self enablePasscodeButtons:NO];
+                    [self shakeInvalidWithCompletionBlock:^{
+                        [self resetInput];
+                        [self enablePasscodeButtons:YES];
+                    }];
+                }
+            }
+        }
+    }];
+}
+
+- (BOOL)passcodeEntryIsValid:(NSArray *)passcodeEntry {
+    
+    if (passcodeEntry.count != DH_PASSCODE_LENGTH) {
+        return NO;
+    }
+    
+    NSString *inputPasscode = [passcodeEntry componentsJoinedByString:DH_PASSCODE_DELIMITER];
+    NSString *currentPasscode = self.currentPasscodeString;
+    
+    return (currentPasscode && [inputPasscode isEqualToString:currentPasscode]);
+}
+
 - (void)setStyle:(DHPasscodeManagerStyle *)style {
     [self removeStyleObservers];
     _style = style;
@@ -255,21 +620,13 @@
     
     [self loadStyle];
     
-    self.dotView0.style = style;
-    self.dotView1.style = style;
-    self.dotView2.style = style;
-    self.dotView3.style = style;
+    [self.dotViews enumerateObjectsUsingBlock:^(DHPasscodeDotView *dotView, NSUInteger idx, BOOL *stop) {
+        dotView.style = style;
+    }];
     
-    self.passcodeButton0.style = style;
-    self.passcodeButton1.style = style;
-    self.passcodeButton2.style = style;
-    self.passcodeButton3.style = style;
-    self.passcodeButton4.style = style;
-    self.passcodeButton5.style = style;
-    self.passcodeButton6.style = style;
-    self.passcodeButton7.style = style;
-    self.passcodeButton8.style = style;
-    self.passcodeButton9.style = style;
+    [self.passcodeButtons enumerateObjectsUsingBlock:^(DHPasscodeButton *passcodeButton, NSUInteger idx, BOOL *stop) {
+        passcodeButton.style = style;
+    }];
 }
 
 - (void)loadStyle {
@@ -309,53 +666,133 @@
     [self loadStyle];
 }
 
+- (void)resetInput {
+    self.firstInput = @[].mutableCopy;
+    self.secondInput = @[].mutableCopy;
+    self.thirdInput = @[].mutableCopy;
+}
+
+- (void)enablePasscodeButtons:(BOOL)enable {
+    [self.passcodeButtons enumerateObjectsUsingBlock:^(DHPasscodeButton *button, NSUInteger idx, BOOL *stop) {
+        button.enabled = enable;
+    }];
+}
+
+- (NSString *)currentPasscodeString {
+
+    NSError *error = nil;
+    SSKeychainQuery *query = [[SSKeychainQuery alloc] init];
+    query.service = DH_PASSCODE_KEYCHAIN_SERVICE_NAME;
+    query.account = DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE;
+    [query fetch:&error];
+    
+    if ([error code] == errSecItemNotFound) {
+        NSLog(@"Password not found");
+    } else if (error != nil) {
+        NSLog(@"Some other error occurred: %@", [error localizedDescription]);
+    }
+    
+    return query.password;
+}
+
+- (NSArray *)currentPasscodeArray {
+    return [self.currentPasscodeString componentsSeparatedByString:DH_PASSCODE_DELIMITER];
+}
+
 - (void)setType:(DHPasscodeViewControllerType)type {
-    _type = type;
     
-    switch (type) {
-        case DHPasscodeViewControllerTypeVerify:
-            self.instructionsLabel.text = NSLocalizedString(@"", @"");
-            break;
-        case DHPasscodeViewControllerTypeCreateNew:
-            self.instructionsLabel.text = NSLocalizedString(@"Enter a passcode", @"Enter a passcode");
-            break;
-        case DHPasscodeViewControllerTypeChangeExisting:
-            self.instructionsLabel.text = NSLocalizedString(@"Enter your current passcode", @"Enter your current passcode");
-            break;
-        case DHPasscodeViewControllerTypeRemove:
-            self.instructionsLabel.text = NSLocalizedString(@"Enter your current passcode", @"Enter your current passcode");
-            break;
+    NSString *currentPasscode = self.currentPasscodeString;
+    if (!currentPasscode) {
+        if (type != DHPasscodeViewControllerTypeCreateNew) {
+            if (self.type != DHPasscodeViewControllerTypeCreateNew) {
+                NSLog(@"No password is currently set! Changing mode to: DHPasscodeViewControllerTypeCreateNew");
+            }
             
-        default:
-            NSLog(@"Unknown DHPasscodeViewControllerType: %@", @(type));
-            break;
+            type = DHPasscodeViewControllerTypeCreateNew;
+        }
     }
+    
+    if (type == _type) return;
+    
+    [self resetInput];
+    
+    _type = type;
 }
 
-- (void)didTapNumber:(DHPasscodeButton *)button {
+- (NSMutableArray *)currentInput {
+
+    NSMutableArray *currentInput = self.firstInput;
     
-    [self.currentInput addObject:@(button.tag)];
-    
-    [self updateDots];
-    
-    if (self.currentInput.count == DH_PASSCODE_LENGTH) {
-        [self passcodeEntryComplete];
+    if (self.firstInput.count == DH_PASSCODE_LENGTH) {
+        if (self.secondInput.count == DH_PASSCODE_LENGTH) {
+            currentInput = self.thirdInput;
+        } else {
+            currentInput = self.secondInput;
+        }
     }
-}
-
-- (void)updateDots {
-    self.dotView0.filled = self.currentInput.count > 0;
-    self.dotView1.filled = self.currentInput.count >= 2;
-    self.dotView2.filled = self.currentInput.count >= 3;
-    self.dotView3.filled = self.currentInput.count >= 4;
-}
-
-- (void)passcodeEntryComplete {
     
+    return currentInput;
 }
 
-- (void)didTapCancel:(UIButton *)button {
+- (NSMutableArray *)lastInput {
     
+    NSMutableArray *lastInput = self.firstInput;
+    
+    if (self.firstInput.count == DH_PASSCODE_LENGTH) {
+        if (self.secondInput.count == DH_PASSCODE_LENGTH) {
+            if (self.thirdInput.count > 0) {
+                lastInput = self.thirdInput;
+            }
+        } else {
+            if (self.secondInput.count > 0) {
+                lastInput = self.secondInput;
+            }
+        }
+    }
+
+    return lastInput;
+}
+
+- (void)shakeInvalidWithCompletionBlock:(void (^)())completionBlock {
+    [self shakeInvalidWithDirection:-1 times:5 current:0 delta:10 interval:0.05 completionBlock:completionBlock];
+}
+
+- (void)shakeInvalidWithDirection:(NSInteger)direction
+                            times:(NSInteger)times
+                          current:(NSInteger)current
+                            delta:(CGFloat)delta
+                         interval:(CGFloat)interval
+                  completionBlock:(void (^)())completionBlock {
+    
+    [UIView animateWithDuration:interval
+                     animations:^{
+                         
+                         for (DHPasscodeDotView *dot in self.dotViews) {
+                             dot.layer.affineTransform = CGAffineTransformMakeTranslation(delta * direction, 0);
+                         }
+                         
+                     } completion:^(BOOL finished) {
+                         
+                         if (current >= times) {
+                             [UIView animateWithDuration:interval animations:^{
+                                 for (DHPasscodeDotView *dot in self.dotViews) {
+                                     dot.layer.affineTransform = CGAffineTransformIdentity;
+                                 }
+                             } completion:^(BOOL finished) {
+                                 if (completionBlock) {
+                                     completionBlock();
+                                 }
+                             }];
+                             return;
+                         }
+                         
+                         [self shakeInvalidWithDirection:direction * -1
+                                                   times:(times - 1)
+                                                 current:(current + 1)
+                                                   delta:delta
+                                                interval:interval
+                                         completionBlock:completionBlock];
+                     }];
 }
 
 @end

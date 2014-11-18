@@ -7,11 +7,15 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <ReactiveCocoa/ReactiveCocoa.h>
+#import <ReactiveCocoa/RACEXTScope.h>
 
 #import "DHPasscodeManagerStyle.h"
 
+@class DHPasscodeManager;
+
 typedef NS_ENUM(NSUInteger, DHPasscodeViewControllerType) {
-    DHPasscodeViewControllerTypeVerify,
+    DHPasscodeViewControllerTypeAuthenticate,
     DHPasscodeViewControllerTypeCreateNew,
     DHPasscodeViewControllerTypeChangeExisting,
     DHPasscodeViewControllerTypeRemove
@@ -22,6 +26,8 @@ typedef NS_ENUM(NSUInteger, DHPasscodeViewControllerType) {
 typedef void (^DHPasscodeManagerViewControllerCompletionBlock)(DHPasscodeViewController *viewController, BOOL success, NSError *error);
 
 @interface DHPasscodeViewController : UIViewController
+
+@property (nonatomic, weak) DHPasscodeManager *passcodeManager;
 
 @property (nonatomic) DHPasscodeViewControllerType type;
 
