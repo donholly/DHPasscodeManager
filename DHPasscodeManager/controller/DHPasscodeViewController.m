@@ -23,10 +23,6 @@
 
 #define DH_PASSCODE_SPACING 10.0f
 
-#define DH_PASSCODE_DELIMITER @"-"
-
-#define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE [[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"] stringByAppendingString:@"_passcode"]
-
 // Changing this would break things right now
 // TODO: support variable length passcodes one day?
 #define DH_PASSCODE_LENGTH 4
@@ -171,7 +167,7 @@
     
     [self resetInput];
     
-    if (self.passcodeManager.touchIDEnabled) {
+    if (self.type == DHPasscodeViewControllerTypeAuthenticate && self.passcodeManager.touchIDEnabled) {
         [self presentTouchIdWithCompletionBlock:^(BOOL success, NSError *error) {
             
             if (self.completionBlock) {
@@ -681,10 +677,9 @@
 - (NSString *)currentPasscodeString {
 
     NSError *error = nil;
-    SSKeychainQuery *query = [[SSKeychainQuery alloc] init];
-    query.service = DH_PASSCODE_KEYCHAIN_SERVICE_NAME;
-    query.account = DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE;
-    [query fetch:&error];
+    NSString *password = [SSKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                                account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                  error:&error];
     
     if ([error code] == errSecItemNotFound) {
         NSLog(@"Password not found");
@@ -692,7 +687,7 @@
         NSLog(@"Some other error occurred: %@", [error localizedDescription]);
     }
     
-    return query.password;
+    return password;
 }
 
 - (NSArray *)currentPasscodeArray {

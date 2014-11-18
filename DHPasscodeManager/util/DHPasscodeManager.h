@@ -27,6 +27,11 @@
 #define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_LAST_SEEN [[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"] \
                                                                                        stringByAppendingString:@"_passcode_time_last_seen"]
 
+#define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE [[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"] \
+                                                                                 stringByAppendingString:@"_passcode"]
+
+#define DH_PASSCODE_DELIMITER @"-"
+
 typedef void (^DHPasscodeManagerCompletionBlock)(BOOL success, NSError *error);
 
 @interface DHPasscodeManager : NSObject
@@ -55,7 +60,6 @@ typedef void (^DHPasscodeManagerCompletionBlock)(BOOL success, NSError *error);
  *  Defaults to 60 seconds
  */
 @property (nonatomic) NSTimeInterval passcodeTimeInternal;
-
 
 + (instancetype)sharedInstance;
 

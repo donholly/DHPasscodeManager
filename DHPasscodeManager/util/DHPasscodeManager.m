@@ -239,6 +239,21 @@ static NSDateFormatter *_lastSeenDateFormatter;
     return _touchIDEnabled && self.touchIDSupported;
 }
 
+- (BOOL)isPasscodeStored {
+    NSError *error = nil;
+    NSString *passcode = [SSKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                                account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                  error:&error];
+    
+    if ([error code] == errSecItemNotFound) {
+        NSLog(@"Password not found");
+    } else if (error != nil) {
+        NSLog(@"Some other error occurred: %@", [error localizedDescription]);
+    }
+    
+    return passcode != nil;
+}
+
 - (BOOL)passcodeEnabled {
     NSError *error;
     NSString *value = [SSKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
@@ -253,7 +268,9 @@ static NSDateFormatter *_lastSeenDateFormatter;
         value = [NSString stringWithFormat:@"%@", DH_PASSCODE_ENABLED_DEFAULT];
     }
     
-    return [value boolValue];
+    BOOL enabled = [value boolValue] && [self isPasscodeStored];
+    
+    return enabled;
 }
 
 - (void)setPasscodeEnabled:(BOOL)passcodeEnabled {
@@ -302,6 +319,15 @@ static NSDateFormatter *_lastSeenDateFormatter;
 - (void)verifyPasscodeWithPresentingViewController:(UIViewController *)presentingViewController
                                           animated:(BOOL)animated
                                    completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
+    
+    if (!self.passcodeEnabled) {
+        if (completionBlock) {
+            completionBlock(NO, [NSError errorWithDomain:@"DHPasscodeErrorDomain"
+                                                    code:0
+                                                userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"A passcode is not currently set", @"A passcode is not currently set")}]);
+        }
+        return;
+    }
     
     self.passcodeViewController.type = DHPasscodeViewControllerTypeAuthenticate;
     
@@ -359,6 +385,16 @@ static NSDateFormatter *_lastSeenDateFormatter;
                                           animated:(BOOL)animated
                                    completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
     
+    // Make sure we have a password set before we attempt to change it
+    if (!self.passcodeEnabled) {
+        if (completionBlock) {
+            completionBlock(NO, [NSError errorWithDomain:@"DHPasscodeErrorDomain"
+                                                    code:0
+                                                userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"A passcode is not currently set", @"A passcode is not currently set")}]);
+        }
+        return;
+    }
+    
     self.passcodeViewController.type = DHPasscodeViewControllerTypeChangeExisting;
     
     @weakify(self)
@@ -386,6 +422,16 @@ static NSDateFormatter *_lastSeenDateFormatter;
 - (void)disablePasscodeWithPresentingViewController:(UIViewController *)presentingViewController
                                            animated:(BOOL)animated
                                     completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
+    
+    // Make sure we have a passcode set before we attempt to disable it
+    if (!self.passcodeEnabled) {
+        if (completionBlock) {
+            completionBlock(NO, [NSError errorWithDomain:@"DHPasscodeErrorDomain"
+                                                    code:0
+                                                userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"A passcode is not currently set", @"A passcode is not currently set")}]);
+        }
+        return;
+    }
     
     self.passcodeViewController.type = DHPasscodeViewControllerTypeRemove;
     

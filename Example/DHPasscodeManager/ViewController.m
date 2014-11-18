@@ -85,7 +85,9 @@
     [[DHPasscodeManager sharedInstance] verifyPasscodeWithPresentingViewController:self
                                                                           animated:YES
                                                                    completionBlock:^(BOOL success, NSError *error) {
-                                                                       
+                                                                       if (error) {
+                                                                           [self handleError:error];
+                                                                       }
                                                                    }];
 }
 
@@ -93,7 +95,9 @@
     [[DHPasscodeManager sharedInstance] createPasscodeWithPresentingViewController:self
                                                                           animated:YES
                                                                    completionBlock:^(BOOL success, NSError *error) {
-                                                                       
+                                                                       if (error) {
+                                                                           [self handleError:error];
+                                                                       }
                                                                    }];
 }
 
@@ -101,7 +105,9 @@
     [[DHPasscodeManager sharedInstance] changePasscodeWithPresentingViewController:self
                                                                           animated:YES
                                                                    completionBlock:^(BOOL success, NSError *error) {
-                                                                       
+                                                                       if (error) {
+                                                                           [self handleError:error];
+                                                                       }
                                                                    }];
 }
 
@@ -109,8 +115,18 @@
     [[DHPasscodeManager sharedInstance] disablePasscodeWithPresentingViewController:self
                                                                            animated:YES
                                                                     completionBlock:^(BOOL success, NSError *error) {
-                                                                        
+                                                                        if (error) {
+                                                                            [self handleError:error];
+                                                                        }
                                                                     }];
+}
+
+- (void)handleError:(NSError *)error {
+    [[[UIAlertView alloc] initWithTitle:@"Error"
+                                message:error.localizedDescription
+                               delegate:nil
+                      cancelButtonTitle:@"Okay"
+                      otherButtonTitles:nil] show];
 }
 
 @end
