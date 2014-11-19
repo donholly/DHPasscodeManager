@@ -19,6 +19,14 @@ static DHPasscodeManager *_sharedInstance;
 
 static NSDateFormatter *_lastActiveDateFormatter;
 
+@implementation UIViewController (DHModal)
+- (BOOL)DH_isModal {
+    return self.presentingViewController.presentedViewController == self
+    || self.navigationController.presentingViewController.presentedViewController == self.navigationController
+    || [self.tabBarController.presentingViewController isKindOfClass:[UITabBarController class]];
+}
+@end
+
 @implementation DHPasscodeManager
 
 @dynamic modalTransitionStyle;
@@ -348,6 +356,11 @@ static NSDateFormatter *_lastActiveDateFormatter;
         }
     };
     
+    if (self.passcodeViewController.DH_isModal) {
+        NSLog(@"PasscodeViewController is already presented!");
+        return;
+    }
+    
     if (!presentingViewController) {
         presentingViewController = [self applicationRootViewController];
     }
@@ -379,6 +392,11 @@ static NSDateFormatter *_lastActiveDateFormatter;
             completionBlock(success, error);
         }
     };
+    
+    if (self.passcodeViewController.DH_isModal) {
+        NSLog(@"PasscodeViewController is already presented!");
+        return;
+    }
     
     if (!presentingViewController) {
         presentingViewController = [self applicationRootViewController];
@@ -422,6 +440,11 @@ static NSDateFormatter *_lastActiveDateFormatter;
         }
     };
     
+    if (self.passcodeViewController.DH_isModal) {
+        NSLog(@"PasscodeViewController is already presented!");
+        return;
+    }
+    
     if (!presentingViewController) {
         presentingViewController = [self applicationRootViewController];
     }
@@ -463,6 +486,11 @@ static NSDateFormatter *_lastActiveDateFormatter;
             completionBlock(success, error);
         }
     };
+    
+    if (self.passcodeViewController.DH_isModal) {
+        NSLog(@"PasscodeViewController is already presented!");
+        return;
+    }
     
     if (!presentingViewController) {
         presentingViewController = [self applicationRootViewController];
