@@ -17,7 +17,7 @@ static DHPasscodeManager *_sharedInstance;
 @property (nonatomic, strong) DHPasscodeViewController *passcodeViewController;
 @end
 
-static NSDateFormatter *_lastSeenDateFormatter;
+static NSDateFormatter *_lastActiveDateFormatter;
 
 @implementation DHPasscodeManager
 
@@ -54,9 +54,9 @@ static NSDateFormatter *_lastSeenDateFormatter;
         self.passcodeViewController.style = self.style;
         self.passcodeViewController.passcodeManager = self;
         
-        _lastSeenDateFormatter = [NSDateFormatter new];
-        _lastSeenDateFormatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
-        [_lastSeenDateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSSSSS"];
+        _lastActiveDateFormatter = [NSDateFormatter new];
+        _lastActiveDateFormatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+        [_lastActiveDateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSSSSS"];
         
         [self addApplicationObservers];
     }
@@ -140,13 +140,17 @@ static NSDateFormatter *_lastSeenDateFormatter;
     else if ([notification.name isEqualToString:UIApplicationWillEnterForegroundNotification]) {
         handleApplicationLock();
     }
-    // Application was sent to the background
+    // Sent to background
     else if ([notification.name isEqualToString:UIApplicationDidEnterBackgroundNotification]) {
-        [self markLastSeenNow];
+        if (![self shouldShowPasscode]) {
+            [self markLastActiveNow];
+        }
     }
-    // Application was forced closed (by system or user)
+    // About to terminate (forced closed by system or user)
     else if ([notification.name isEqualToString:UIApplicationWillTerminateNotification]) {
-        [self markLastSeenNow];
+        if (![self shouldShowPasscode]) {
+            [self markLastActiveNow];
+        }
     }
 }
 
@@ -154,14 +158,14 @@ static NSDateFormatter *_lastSeenDateFormatter;
     
     NSTimeInterval timeInterval = self.passcodeTimeInternal;
     
-    NSDate *lastSeen = self.lastSeenDate;
+    NSDate *lastActive = self.lastActiveDate;
     
-    BOOL timeRequirement = ([[NSDate date] timeIntervalSinceDate:lastSeen] > timeInterval);
+    BOOL timeRequirement = ([[NSDate date] timeIntervalSinceDate:lastActive] > timeInterval);
     
     return self.passcodeEnabled && timeRequirement;
 }
 
-- (NSDate *)lastSeenDate {
+- (NSDate *)lastActiveDate {
     NSError *error;
     NSString *value = [SSKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
                                              account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_LAST_SEEN
@@ -172,17 +176,17 @@ static NSDateFormatter *_lastSeenDateFormatter;
     }
     
     if (!value) {
-        value = [NSString stringWithFormat:@"%@", [_lastSeenDateFormatter stringFromDate:[NSDate date]]];
+        value = [NSString stringWithFormat:@"%@", [_lastActiveDateFormatter stringFromDate:[NSDate date]]];
     }
     
-    NSDate *date = [_lastSeenDateFormatter dateFromString:value];
+    NSDate *date = [_lastActiveDateFormatter dateFromString:value];
     
     return date;
 }
 
-- (void)markLastSeenNow {
+- (void)markLastActiveNow {
     NSError *error;
-    NSString *lastSeenDate = [NSString stringWithFormat:@"%@", [_lastSeenDateFormatter stringFromDate:[NSDate date]]];
+    NSString *lastSeenDate = [NSString stringWithFormat:@"%@", [_lastActiveDateFormatter stringFromDate:[NSDate date]]];
     BOOL success = [SSKeychain setPassword:lastSeenDate
                                 forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_LAST_SEEN
