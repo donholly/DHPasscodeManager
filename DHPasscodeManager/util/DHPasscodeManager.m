@@ -123,7 +123,7 @@ static NSDateFormatter *_lastSeenDateFormatter;
             // We do this on the next runloop to avoid:
             // Unbalanced calls to begin/end appearance transitions for <UIViewController>
             dispatch_async(dispatch_get_main_queue(), ^{
-                [self verifyPasscodeWithPresentingViewController:[self rootViewController]
+                [self verifyPasscodeWithPresentingViewController:[self applicationRootViewController]
                                                         animated:self.animatePresentationAndDismissal
                                                  completionBlock:^(BOOL success, NSError *error) {
                                                      
@@ -195,7 +195,7 @@ static NSDateFormatter *_lastSeenDateFormatter;
 
 #pragma mark - Setters / Getters -
 
-- (UIViewController *)rootViewController {
+- (UIViewController *)applicationRootViewController {
     UIViewController *rootViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
     
     while (rootViewController.presentedViewController) {
@@ -245,10 +245,8 @@ static NSDateFormatter *_lastSeenDateFormatter;
                                                 account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
                                                   error:&error];
     
-    if ([error code] == errSecItemNotFound) {
-        NSLog(@"Password not found");
-    } else if (error != nil) {
-        NSLog(@"Some other error occurred: %@", [error localizedDescription]);
+    if (error && [error code] != errSecItemNotFound) {
+        NSLog(@"Error fetching passcode from keychain: %@", [error localizedDescription]);
     }
     
     return passcode != nil;
@@ -346,6 +344,10 @@ static NSDateFormatter *_lastSeenDateFormatter;
         }
     };
     
+    if (!presentingViewController) {
+        presentingViewController = [self applicationRootViewController];
+    }
+    
     [presentingViewController presentViewController:self.passcodeViewController
                                            animated:animated
                                          completion:^{
@@ -373,6 +375,10 @@ static NSDateFormatter *_lastSeenDateFormatter;
             completionBlock(success, error);
         }
     };
+    
+    if (!presentingViewController) {
+        presentingViewController = [self applicationRootViewController];
+    }
     
     [presentingViewController presentViewController:self.passcodeViewController
                                            animated:animated
@@ -412,6 +418,10 @@ static NSDateFormatter *_lastSeenDateFormatter;
         }
     };
     
+    if (!presentingViewController) {
+        presentingViewController = [self applicationRootViewController];
+    }
+    
     [presentingViewController presentViewController:self.passcodeViewController
                                            animated:animated
                                          completion:^{
@@ -449,6 +459,10 @@ static NSDateFormatter *_lastSeenDateFormatter;
             completionBlock(success, error);
         }
     };
+    
+    if (!presentingViewController) {
+        presentingViewController = [self applicationRootViewController];
+    }
     
     [presentingViewController presentViewController:self.passcodeViewController
                                            animated:animated

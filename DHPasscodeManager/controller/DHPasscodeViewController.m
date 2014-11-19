@@ -195,19 +195,25 @@
     CGFloat maxLogoHeight = MIN(self.view.frame.size.height - (spaceForButtons + spaceForDots + instructionsSize.height + spacing),
                                 imageSize.height);
     
-    // Logo
-    self.logoImageView.frame = CGRectMake(DH_PASSCODE_SPACING,
-                                          DH_PASSCODE_SPACING * 2,
-                                          self.view.frame.size.width - (2 * DH_PASSCODE_SPACING),
-                                          maxLogoHeight);
-    
     // Instructions
-    CGFloat instructionsPadding = ((self.view.frame.size.height - CGRectGetMaxY(self.logoImageView.frame) - DH_PASSCODE_SPACING)/2 - spaceForButtons/2 - instructionsSize.height/2) / 2;
-    CGFloat instructionsY = CGRectGetMaxY(self.logoImageView.frame) + DH_PASSCODE_SPACING + instructionsPadding;
+    CGFloat instructionsPadding = ((self.view.frame.size.height -
+                                    (DH_PASSCODE_SPACING * 2 + maxLogoHeight) -
+                                    DH_PASSCODE_SPACING)/2 -
+                                   spaceForButtons/2 -
+                                   instructionsSize.height/2) / 2;
+    
+    CGFloat instructionsY = (DH_PASSCODE_SPACING * 2 + maxLogoHeight) + DH_PASSCODE_SPACING + instructionsPadding;
     self.instructionsLabel.frame = CGRectMake(self.view.frame.size.width/2 - instructionsSize.width/2,
                                               instructionsY,
                                               instructionsSize.width,
                                               instructionsSize.height);
+    
+    // Logo
+    CGFloat logoY = (instructionsY/2 - maxLogoHeight/2) + DH_PASSCODE_SPACING;
+    self.logoImageView.frame = CGRectMake(DH_PASSCODE_SPACING,
+                                          logoY,
+                                          self.view.frame.size.width - (2 * DH_PASSCODE_SPACING),
+                                          maxLogoHeight);
     
     // Dots
     self.dotView0.frame = CGRectMake(self.view.frame.size.width/2 - (2 * DH_PASSCODE_DOT_SIZE) - (1.5 * DH_PASSCODE_DOT_SPACING),
@@ -681,10 +687,8 @@
                                                 account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
                                                   error:&error];
     
-    if ([error code] == errSecItemNotFound) {
-        NSLog(@"Password not found");
-    } else if (error != nil) {
-        NSLog(@"Some other error occurred: %@", [error localizedDescription]);
+    if (error && [error code] != errSecItemNotFound) {
+        NSLog(@"Error fetching passcode: %@", [error localizedDescription]);
     }
     
     return password;

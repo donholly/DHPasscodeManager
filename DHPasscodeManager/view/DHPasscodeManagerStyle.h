@@ -14,6 +14,10 @@
 @property (nonatomic, strong) UIColor *backgroundColor;
 @property (nonatomic, strong) UIImage *logoImage;
 
+// Instructions
+@property (nonatomic, strong) UIColor *instructionsTextColor;
+@property (nonatomic, strong) UIFont *instructionsTextFont;
+
 // Buttons
 @property (nonatomic, strong) UIColor *buttonOutlineColor;
 @property (nonatomic, strong) UIColor *buttonOutlineColorHighlighted;
@@ -29,11 +33,7 @@
 
 @property (nonatomic, strong) UIColor *cancelButtonTextColor;
 @property (nonatomic, strong) UIColor *cancelButtonTextColorHighlighted;
-
 @property (nonatomic, strong) UIFont *cancelButtonTextFont;
-
-@property (nonatomic, strong) UIColor *instructionsTextColor;
-@property (nonatomic, strong) UIFont *instructionsTextFont;
 
 // Dots
 @property (nonatomic, strong) UIColor *dotOutlineColor;
