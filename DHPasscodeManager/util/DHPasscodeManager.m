@@ -9,6 +9,7 @@
 #import "DHPasscodeManager.h"
 
 #define DH_PASSCODE_ENABLED_DEFAULT @NO
+#define DH_PASSCODE_TOUCHID_ENABLED_DEFAULT @YES
 #define DH_PASSCODE_TIME_INTERVAL_DEFAULT @(60)
 
 static DHPasscodeManager *_sharedInstance;
@@ -32,6 +33,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
 @dynamic modalTransitionStyle;
 @dynamic passcodeEnabled;
 @dynamic passcodeTimeInternal;
+@dynamic touchIDEnabled;
 
 - (void)dealloc {
     [self removeApplicationObservers];
@@ -53,8 +55,6 @@ static NSDateFormatter *_lastActiveDateFormatter;
     }
     
     if ((self = [super init])) {
-
-        self.touchIDEnabled = YES;
         
         self.style = [[DHPasscodeManagerStyle alloc] init];
         
@@ -248,7 +248,22 @@ static NSDateFormatter *_lastActiveDateFormatter;
 }
 
 - (BOOL)touchIDEnabled {
-    return _touchIDEnabled && self.touchIDSupported;
+    NSError *error;
+    NSString *value = [SSKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                             account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TOUCHID_ENABLED
+                                               error:&error];
+    
+    if (error) {
+        NSLog(@"Error determining if TouchID is enabled: %@", error);
+    }
+    
+    if (!value) {
+        value = [NSString stringWithFormat:@"%@", DH_PASSCODE_TOUCHID_ENABLED_DEFAULT];
+    }
+    
+    BOOL enabled = [value boolValue] && [self touchIDSupported];
+    
+    return enabled;
 }
 
 - (BOOL)isPasscodeStored {
