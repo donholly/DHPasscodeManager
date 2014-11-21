@@ -22,7 +22,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
 @implementation UIViewController (DHModal)
 - (BOOL)DH_isModal {
     return self.presentingViewController.presentedViewController == self
-    || self.navigationController.presentingViewController.presentedViewController == self.navigationController
+    || (self.navigationController != nil && self.navigationController.presentingViewController.presentedViewController == self.navigationController)
     || [self.tabBarController.presentingViewController isKindOfClass:[UITabBarController class]];
 }
 @end
