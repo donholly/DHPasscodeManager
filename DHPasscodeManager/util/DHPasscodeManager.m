@@ -290,6 +290,12 @@ static NSDateFormatter *_lastActiveDateFormatter;
                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_ENABLED
                                      error:&error];
     
+    if (success && !passcodeEnabled) {
+        success = [SSKeychain deletePasswordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                               account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                 error:&error];
+    }
+    
     if (!success || error) {
         NSLog(@"Error setting passcode enabled/disabled: %@", error);
     }
