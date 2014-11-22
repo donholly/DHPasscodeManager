@@ -266,6 +266,18 @@ static NSDateFormatter *_lastActiveDateFormatter;
     return enabled;
 }
 
+- (void)setTouchIDEnabled:(BOOL)touchIDEnabled {
+    NSError *error;
+    BOOL success = [SSKeychain setPassword:[NSString stringWithFormat:@"%@", @(touchIDEnabled)]
+                                forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                   account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TOUCHID_ENABLED
+                                     error:&error];
+    
+    if (!success || error) {
+        NSLog(@"Error setting TouchID to enabled/disabled: %@", error);
+    }
+}
+
 - (BOOL)isPasscodeStored {
     NSError *error = nil;
     NSString *passcode = [SSKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME

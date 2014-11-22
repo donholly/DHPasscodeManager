@@ -16,7 +16,7 @@
 #import <LocalAuthentication/LocalAuthentication.h>
 #endif
 
-#define DH_PASSCODE_KEYCHAIN_SERVICE_NAME [[[NSBundle mainBundle] infoDictionary] objectForKey:kCFBundleIdentifierKey]
+#define DH_PASSCODE_KEYCHAIN_SERVICE_NAME [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString *)kCFBundleIdentifierKey]
 
 #define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_ENABLED                                 @"DHPasscodeManager_passcode_enabled"
 
@@ -40,7 +40,15 @@ typedef void (^DHPasscodeManagerCompletionBlock)(BOOL success, NSError *error);
 @property (nonatomic) BOOL animatePresentationAndDismissal;
 
 // TouchID
+
 @property (nonatomic, readonly) BOOL touchIDSupported;
+
+/**
+ * Enable/Disable TouchID support (is dependent on touchIDSupported)
+ *
+ * Defaults to YES
+ */
+
 @property (nonatomic) BOOL touchIDEnabled;
 
 // Behavior
