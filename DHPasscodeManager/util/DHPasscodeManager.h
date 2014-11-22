@@ -18,19 +18,19 @@
 
 #define DH_PASSCODE_KEYCHAIN_SERVICE_NAME @"DHPasscodeManager"
 
-#define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_ENABLED [[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"] \
+#define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_ENABLED [[[[NSBundle mainBundle] infoDictionary] objectForKey:kCFBundleIdentifierKey] \
                                                                                 stringByAppendingString:@"_passcode_enabled"]
 
-#define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_INTERVAL [[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"] \
+#define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_INTERVAL [[[[NSBundle mainBundle] infoDictionary] objectForKey:kCFBundleIdentifierKey] \
                                                                                       stringByAppendingString:@"_passcode_time_interval"]
 
-#define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_LAST_SEEN [[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"] \
+#define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_LAST_SEEN [[[[NSBundle mainBundle] infoDictionary] objectForKey:kCFBundleIdentifierKey] \
                                                                                        stringByAppendingString:@"_passcode_time_last_seen"]
 
-#define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE [[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"] \
+#define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE [[[[NSBundle mainBundle] infoDictionary] objectForKey:kCFBundleIdentifierKey] \
                                                                                  stringByAppendingString:@"_passcode"]
 
-#define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TOUCHID_ENABLED [[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleName"] \
+#define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TOUCHID_ENABLED [[[[NSBundle mainBundle] infoDictionary] objectForKey:kCFBundleIdentifierKey] \
                                                                                         stringByAppendingString:@"_touchid_enabled"]
 
 #define DH_PASSCODE_DELIMITER @"-"
