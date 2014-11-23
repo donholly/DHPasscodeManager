@@ -55,11 +55,14 @@
 @property (nonatomic, strong) NSMutableArray *secondInput;
 @property (nonatomic, strong) NSMutableArray *thirdInput;
 
+@property (nonatomic, copy) void (^onApplicationDidBecomeActiveBlock)();
+
 @end
 
 @implementation DHPasscodeViewController
 
 - (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidBecomeActiveNotification object:nil];
     [self removeStyleObservers];
 }
 
@@ -75,6 +78,11 @@
         
         self.dotViews = [NSMutableOrderedSet orderedSet];
         self.passcodeButtons = [NSMutableOrderedSet orderedSet];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(applicationDidBecomeActive:)
+                                                     name:UIApplicationDidBecomeActiveNotification
+                                                   object:nil];
     }
     return self;
 }
@@ -162,19 +170,37 @@
     [self setupSignals];
 }
 
+- (void)applicationDidBecomeActive:(NSNotification *)notification {
+    if (self.onApplicationDidBecomeActiveBlock) {
+        self.onApplicationDidBecomeActiveBlock();
+        self.onApplicationDidBecomeActiveBlock = nil;
+    }
+}
+
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
     [self resetInput];
     
     if (self.type == DHPasscodeViewControllerTypeAuthenticate && self.passcodeManager.touchIDEnabled) {
-        [self presentTouchIdWithCompletionBlock:^(BOOL success, NSError *error) {
-            
-            if (self.completionBlock) {
-                self.completionBlock(self, success, error);
-            }
-            
-        }];
+    
+        void (^presentTouchID)() = ^() {
+            [self presentTouchIdWithCompletionBlock:^(BOOL success, NSError *error) {
+                
+                if (self.completionBlock) {
+                    self.completionBlock(self, success, error);
+                }
+                
+            }];
+        };
+        
+        if ([UIApplication sharedApplication].applicationState == UIApplicationStateActive) {
+            presentTouchID();
+        } else {
+            self.onApplicationDidBecomeActiveBlock = ^{
+                presentTouchID();
+            };
+        }
     }
 }
 
