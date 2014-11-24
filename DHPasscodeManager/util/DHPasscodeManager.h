@@ -36,7 +36,6 @@ typedef void (^DHPasscodeManagerCompletionBlock)(BOOL success, NSError *error);
 
 // Style
 @property (nonatomic, readonly) DHPasscodeManagerStyle *style;
-@property (nonatomic) UIModalTransitionStyle modalTransitionStyle;
 @property (nonatomic) BOOL animatePresentationAndDismissal;
 
 // TouchID
@@ -72,22 +71,18 @@ typedef void (^DHPasscodeManagerCompletionBlock)(BOOL success, NSError *error);
 // Convenience method - could be used for securing sections of an application (versus the whole app)
 // This method will be used internally by DHPasscodeManager for bringing up the passcode when appropriate, based on behavior settings
 
-- (void)verifyPasscodeWithPresentingViewController:(UIViewController *)presentingViewController
-                                          animated:(BOOL)animated
-                                   completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock;
+- (void)authenticateUserAnimated:(BOOL)animated
+                 completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock;
 
 // Passcode management methods (Add / Change / Remove)
 
-- (void)createPasscodeWithPresentingViewController:(UIViewController *)presentingViewController
-                                          animated:(BOOL)animated
-                                   completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock;
+- (void)createPasscodeAnimated:(BOOL)animated
+               completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock;
 
-- (void)changePasscodeWithPresentingViewController:(UIViewController *)presentingViewController
-                                          animated:(BOOL)animated
-                                   completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock;
+- (void)changePasscodeAnimated:(BOOL)animated
+               completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock;
 
-- (void)disablePasscodeWithPresentingViewController:(UIViewController *)presentingViewController
-                                           animated:(BOOL)animated
-                                    completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock;
+- (void)disablePasscodeAnimated:(BOOL)animated
+                completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock;
 
 @end

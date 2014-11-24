@@ -42,12 +42,11 @@
     [self.disablePasscodeButton addTarget:self action:@selector(didTapDisable:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.disablePasscodeButton];
     
-    // Style the passcode manager
+    // Enable Passcode
     [DHPasscodeManager sharedInstance].passcodeEnabled = YES;
     
+    // Style Passcode View
     [DHPasscodeManager sharedInstance].style.logoImage = [UIImage imageNamed:@"lock"];
-    
-    [DHPasscodeManager sharedInstance].modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -82,43 +81,39 @@
 }
 
 - (void)didTapVerify:(UIButton *)button {
-    [[DHPasscodeManager sharedInstance] verifyPasscodeWithPresentingViewController:self
-                                                                          animated:YES
-                                                                   completionBlock:^(BOOL success, NSError *error) {
-                                                                       if (error) {
-                                                                           [self handleError:error];
-                                                                       }
-                                                                   }];
+    [[DHPasscodeManager sharedInstance] authenticateUserAnimated:YES
+                                                 completionBlock:^(BOOL success, NSError *error) {
+                                                     if (error) {
+                                                         [self handleError:error];
+                                                     }
+                                                 }];
 }
 
 - (void)didTapCreate:(UIButton *)button {
-    [[DHPasscodeManager sharedInstance] createPasscodeWithPresentingViewController:self
-                                                                          animated:YES
-                                                                   completionBlock:^(BOOL success, NSError *error) {
-                                                                       if (error) {
-                                                                           [self handleError:error];
-                                                                       }
-                                                                   }];
+    [[DHPasscodeManager sharedInstance] createPasscodeAnimated:YES
+                                               completionBlock:^(BOOL success, NSError *error) {
+                                                   if (error) {
+                                                       [self handleError:error];
+                                                   }
+                                               }];
 }
 
 - (void)didTapChange:(UIButton *)button {
-    [[DHPasscodeManager sharedInstance] changePasscodeWithPresentingViewController:self
-                                                                          animated:YES
-                                                                   completionBlock:^(BOOL success, NSError *error) {
-                                                                       if (error) {
-                                                                           [self handleError:error];
-                                                                       }
-                                                                   }];
+    [[DHPasscodeManager sharedInstance] changePasscodeAnimated:YES
+                                               completionBlock:^(BOOL success, NSError *error) {
+                                                   if (error) {
+                                                       [self handleError:error];
+                                                   }
+                                               }];
 }
 
 - (void)didTapDisable:(UIButton *)button {
-    [[DHPasscodeManager sharedInstance] disablePasscodeWithPresentingViewController:self
-                                                                           animated:YES
-                                                                    completionBlock:^(BOOL success, NSError *error) {
-                                                                        if (error) {
-                                                                            [self handleError:error];
-                                                                        }
-                                                                    }];
+    [[DHPasscodeManager sharedInstance] disablePasscodeAnimated:YES
+                                                completionBlock:^(BOOL success, NSError *error) {
+                                                    if (error) {
+                                                        [self handleError:error];
+                                                    }
+                                                }];
 }
 
 - (void)handleError:(NSError *)error {

@@ -11,26 +11,20 @@
 #define DH_PASSCODE_ENABLED_DEFAULT @NO
 #define DH_PASSCODE_TOUCHID_ENABLED_DEFAULT @YES
 #define DH_PASSCODE_TIME_INTERVAL_DEFAULT @(60)
+#define DH_PASSCODE_ANIMATION_DURATION_DEFAULT 0.5f
 
 static DHPasscodeManager *_sharedInstance;
 
 @interface DHPasscodeManager ()
+@property (nonatomic, strong) UIWindow *window;
 @property (nonatomic, strong) DHPasscodeViewController *passcodeViewController;
+@property (nonatomic) BOOL currentlyAuthenticated;
 @end
 
 static NSDateFormatter *_lastActiveDateFormatter;
 
-@implementation UIViewController (DHModal)
-- (BOOL)DH_isModal {
-    return self.presentingViewController.presentedViewController == self
-    || (self.navigationController != nil && self.navigationController.presentingViewController.presentedViewController == self.navigationController)
-    || [self.tabBarController.presentingViewController isKindOfClass:[UITabBarController class]];
-}
-@end
-
 @implementation DHPasscodeManager
 
-@dynamic modalTransitionStyle;
 @dynamic passcodeEnabled;
 @dynamic passcodeTimeInternal;
 @dynamic touchIDEnabled;
@@ -56,6 +50,9 @@ static NSDateFormatter *_lastActiveDateFormatter;
     
     if ((self = [super init])) {
         
+        self.window = [[UIWindow alloc] initWithFrame:CGRectZero];
+        self.window.windowLevel = UIWindowLevelNormal;
+        
         self.style = [[DHPasscodeManagerStyle alloc] init];
         
         self.passcodeViewController = [[DHPasscodeViewController alloc] init];
@@ -65,7 +62,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
         _lastActiveDateFormatter = [NSDateFormatter new];
         _lastActiveDateFormatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
         [_lastActiveDateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSSSSS"];
-        
+    
         [self addApplicationObservers];
     }
     
@@ -127,15 +124,14 @@ static NSDateFormatter *_lastActiveDateFormatter;
 - (void)handleApplicationNotification:(NSNotification *)notification {
     
     void (^handleApplicationLock)() = ^() {
-        if ([self shouldShowPasscode]) {
+        if ([self shouldRequirePasscode]) {
             // We do this on the next runloop to avoid:
             // Unbalanced calls to begin/end appearance transitions for <UIViewController>
             dispatch_async(dispatch_get_main_queue(), ^{
-                [self verifyPasscodeWithPresentingViewController:[self applicationRootViewController]
-                                                        animated:self.animatePresentationAndDismissal
-                                                 completionBlock:^(BOOL success, NSError *error) {
-                                                     
-                                                 }];
+                [self authenticateUserAnimated:self.animatePresentationAndDismissal
+                               completionBlock:^(BOOL success, NSError *error) {
+
+                               }];
             });
         }
     };
@@ -150,27 +146,28 @@ static NSDateFormatter *_lastActiveDateFormatter;
     }
     // Sent to background
     else if ([notification.name isEqualToString:UIApplicationDidEnterBackgroundNotification]) {
-        if (![self shouldShowPasscode]) {
+        if (self.currentlyAuthenticated) {
             [self markLastActiveNow];
         }
     }
     // About to terminate (forced closed by system or user)
     else if ([notification.name isEqualToString:UIApplicationWillTerminateNotification]) {
-        if (![self shouldShowPasscode]) {
+        if (self.currentlyAuthenticated) {
             [self markLastActiveNow];
         }
     }
 }
 
-- (BOOL)shouldShowPasscode {
-    
-    NSTimeInterval timeInterval = self.passcodeTimeInternal;
-    
+- (BOOL)shouldRequirePasscode {
+
     NSDate *lastActive = self.lastActiveDate;
     
-    BOOL timeRequirement = ([[NSDate date] timeIntervalSinceDate:lastActive] > timeInterval);
+    BOOL passcodeEnabled = self.passcodeEnabled;
     
-    return self.passcodeEnabled && timeRequirement;
+    NSTimeInterval currentInterval = [[NSDate date] timeIntervalSinceDate:lastActive];
+    BOOL timeRequirement = (currentInterval >= self.passcodeTimeInternal);
+    
+    return passcodeEnabled && timeRequirement;
 }
 
 - (NSDate *)lastActiveDate {
@@ -207,14 +204,12 @@ static NSDateFormatter *_lastActiveDateFormatter;
 
 #pragma mark - Setters / Getters -
 
-- (UIViewController *)applicationRootViewController {
-    UIViewController *rootViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
+- (void)setCurrentlyAuthenticated:(BOOL)currentlyAuthenticated {
+    _currentlyAuthenticated = currentlyAuthenticated;
     
-    while (rootViewController.presentedViewController) {
-        rootViewController = rootViewController.presentedViewController;
+    if (currentlyAuthenticated) {
+        [self markLastActiveNow];
     }
-    
-    return rootViewController;
 }
 
 - (void)setStyle:(DHPasscodeManagerStyle *)style {
@@ -222,23 +217,16 @@ static NSDateFormatter *_lastActiveDateFormatter;
     self.passcodeViewController.style = style;
 }
 
-- (void)setModalTransitionStyle:(UIModalTransitionStyle)modalTransitionStyle {
-    self.passcodeViewController.modalTransitionStyle = modalTransitionStyle;
-}
-
-- (UIModalTransitionStyle)modalTransitionStyle {
-    return self.passcodeViewController.modalTransitionStyle;
-}
-
 - (BOOL)touchIDSupported {
     
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
     if ([[UIDevice currentDevice].systemVersion floatValue] >= 8.0) {
-        LAContext *context = [[LAContext alloc] init];
         NSError *error;
+        LAContext *context = [[LAContext alloc] init];
         
-        return [context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
-                                    error:&error];
+        BOOL canEvaluate = [context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
+                                                error:&error];
+        return canEvaluate;
     } else {
         return NO;
     }
@@ -253,7 +241,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
                                              account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TOUCHID_ENABLED
                                                error:&error];
     
-    if (error) {
+    if (error && [error code] != errSecItemNotFound) {
         NSLog(@"Error determining if TouchID is enabled: %@", error);
     }
     
@@ -297,7 +285,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
                                              account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_ENABLED
                                                error:&error];
     
-    if (error) {
+    if (error && [error code] != errSecItemNotFound) {
         NSLog(@"Error determining if passcode is enabled: %@", error);
     }
     
@@ -359,9 +347,8 @@ static NSDateFormatter *_lastActiveDateFormatter;
 
 #pragma mark - Passcode Manipulation -
 
-- (void)verifyPasscodeWithPresentingViewController:(UIViewController *)presentingViewController
-                                          animated:(BOOL)animated
-                                   completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
+- (void)authenticateUserAnimated:(BOOL)animated
+                 completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
     
     if (!self.passcodeEnabled) {
         if (completionBlock) {
@@ -378,10 +365,10 @@ static NSDateFormatter *_lastActiveDateFormatter;
     self.passcodeViewController.completionBlock = ^(DHPasscodeViewController *viewController, BOOL success, NSError *error) {
         @strongify(self)
         
+        self.currentlyAuthenticated = success;
+        
         if (success || (!success && !error)) {
-            [self.passcodeViewController dismissViewControllerAnimated:animated completion:^{
-                
-            }];
+            [self dismissPasscodeWindowAnimated:animated];
         }
         
         if (completionBlock) {
@@ -389,36 +376,22 @@ static NSDateFormatter *_lastActiveDateFormatter;
         }
     };
     
-    if (self.passcodeViewController.DH_isModal) {
-        NSLog(@"PasscodeViewController is already presented!");
-        return;
-    }
-    
-    if (!presentingViewController) {
-        presentingViewController = [self applicationRootViewController];
-    }
-    
-    [presentingViewController presentViewController:self.passcodeViewController
-                                           animated:animated
-                                         completion:^{
-                                             
-                                         }];
+    [self presentPasscodeWindowAnimated:animated];
 }
 
-- (void)createPasscodeWithPresentingViewController:(UIViewController *)presentingViewController
-                                          animated:(BOOL)animated
-                                   completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
-
+- (void)createPasscodeAnimated:(BOOL)animated
+               completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
+    
     self.passcodeViewController.type = DHPasscodeViewControllerTypeCreateNew;
     
     @weakify(self)
     self.passcodeViewController.completionBlock = ^(DHPasscodeViewController *viewController, BOOL success, NSError *error) {
         @strongify(self)
         
+        self.currentlyAuthenticated = success;
+        
         if (success || (!success && !error)) {
-            [self.passcodeViewController dismissViewControllerAnimated:animated completion:^{
-                
-            }];
+            [self dismissPasscodeWindowAnimated:animated];
         }
         
         if (completionBlock) {
@@ -426,25 +399,11 @@ static NSDateFormatter *_lastActiveDateFormatter;
         }
     };
     
-    if (self.passcodeViewController.DH_isModal) {
-        NSLog(@"PasscodeViewController is already presented!");
-        return;
-    }
-    
-    if (!presentingViewController) {
-        presentingViewController = [self applicationRootViewController];
-    }
-    
-    [presentingViewController presentViewController:self.passcodeViewController
-                                           animated:animated
-                                         completion:^{
-                                             
-                                         }];
+    [self presentPasscodeWindowAnimated:animated];
 }
 
-- (void)changePasscodeWithPresentingViewController:(UIViewController *)presentingViewController
-                                          animated:(BOOL)animated
-                                   completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
+- (void)changePasscodeAnimated:(BOOL)animated
+               completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
     
     // Make sure we have a password set before we attempt to change it
     if (!self.passcodeEnabled) {
@@ -462,10 +421,10 @@ static NSDateFormatter *_lastActiveDateFormatter;
     self.passcodeViewController.completionBlock = ^(DHPasscodeViewController *viewController, BOOL success, NSError *error) {
         @strongify(self)
         
+        self.currentlyAuthenticated = success;
+        
         if (success || (!success && !error)) {
-            [self.passcodeViewController dismissViewControllerAnimated:animated completion:^{
-                
-            }];
+            [self dismissPasscodeWindowAnimated:animated];
         }
         
         if (completionBlock) {
@@ -473,25 +432,11 @@ static NSDateFormatter *_lastActiveDateFormatter;
         }
     };
     
-    if (self.passcodeViewController.DH_isModal) {
-        NSLog(@"PasscodeViewController is already presented!");
-        return;
-    }
-    
-    if (!presentingViewController) {
-        presentingViewController = [self applicationRootViewController];
-    }
-    
-    [presentingViewController presentViewController:self.passcodeViewController
-                                           animated:animated
-                                         completion:^{
-                                             
-                                         }];
+    [self presentPasscodeWindowAnimated:animated];
 }
 
-- (void)disablePasscodeWithPresentingViewController:(UIViewController *)presentingViewController
-                                           animated:(BOOL)animated
-                                    completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
+- (void)disablePasscodeAnimated:(BOOL)animated
+                completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
     
     // Make sure we have a passcode set before we attempt to disable it
     if (!self.passcodeEnabled) {
@@ -509,10 +454,10 @@ static NSDateFormatter *_lastActiveDateFormatter;
     self.passcodeViewController.completionBlock = ^(DHPasscodeViewController *viewController, BOOL success, NSError *error) {
         @strongify(self)
         
+        self.currentlyAuthenticated = success;
+        
         if (success || (!success && !error)) {
-            [self.passcodeViewController dismissViewControllerAnimated:animated completion:^{
-                
-            }];
+            [self dismissPasscodeWindowAnimated:animated];
         }
         
         if (completionBlock) {
@@ -520,20 +465,42 @@ static NSDateFormatter *_lastActiveDateFormatter;
         }
     };
     
-    if (self.passcodeViewController.DH_isModal) {
-        NSLog(@"PasscodeViewController is already presented!");
-        return;
-    }
+    [self presentPasscodeWindowAnimated:animated];
+}
+
+#pragma mark - Present / Dismiss Passcode Window -
+
+- (void)presentPasscodeWindowAnimated:(BOOL)animated {
+
+    CGFloat animationDuration = animated ? DH_PASSCODE_ANIMATION_DURATION_DEFAULT : 0;
     
-    if (!presentingViewController) {
-        presentingViewController = [self applicationRootViewController];
-    }
+    self.window.frame = [[UIScreen mainScreen] bounds];
+    [self.window setRootViewController:self.passcodeViewController];
+    self.window.alpha = 0.0f;
+    self.window.hidden = NO;
     
-    [presentingViewController presentViewController:self.passcodeViewController
-                                           animated:animated
-                                         completion:^{
-                                             
-                                         }];
+    [[UIApplication sharedApplication].keyWindow addSubview:self.window];
+    
+    [UIView animateWithDuration:animationDuration
+                     animations:^{
+                         self.window.alpha = 1.0f;
+                     }
+                     completion:^(BOOL finished) {
+                         
+                     }];
+}
+
+- (void)dismissPasscodeWindowAnimated:(BOOL)animated {
+
+    CGFloat animationDuration = animated ? DH_PASSCODE_ANIMATION_DURATION_DEFAULT : 0;
+    
+    [UIView animateWithDuration:animationDuration
+                     animations:^{
+                         self.window.alpha = 0.0f;
+                     }
+                     completion:^(BOOL finished) {
+                         self.window.hidden = YES;
+                     }];
 }
 
 @end

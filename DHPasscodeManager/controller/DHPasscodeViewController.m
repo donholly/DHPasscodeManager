@@ -55,14 +55,11 @@
 @property (nonatomic, strong) NSMutableArray *secondInput;
 @property (nonatomic, strong) NSMutableArray *thirdInput;
 
-@property (nonatomic, copy) void (^onApplicationDidBecomeActiveBlock)();
-
 @end
 
 @implementation DHPasscodeViewController
 
 - (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidBecomeActiveNotification object:nil];
     [self removeStyleObservers];
 }
 
@@ -78,11 +75,6 @@
         
         self.dotViews = [NSMutableOrderedSet orderedSet];
         self.passcodeButtons = [NSMutableOrderedSet orderedSet];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(applicationDidBecomeActive:)
-                                                     name:UIApplicationDidBecomeActiveNotification
-                                                   object:nil];
     }
     return self;
 }
@@ -170,42 +162,24 @@
     [self setupSignals];
 }
 
-- (void)applicationDidBecomeActive:(NSNotification *)notification {
-    if (self.onApplicationDidBecomeActiveBlock) {
-        self.onApplicationDidBecomeActiveBlock();
-        self.onApplicationDidBecomeActiveBlock = nil;
-    }
-}
-
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
     [self resetInput];
-    
-    if (self.type == DHPasscodeViewControllerTypeAuthenticate && self.passcodeManager.touchIDEnabled) {
-    
-        void (^presentTouchID)() = ^() {
-            [self presentTouchIdWithCompletionBlock:^(BOOL success, NSError *error) {
-                
-                if (self.completionBlock) {
-                    self.completionBlock(self, success, error);
-                }
-                
-            }];
-        };
-        
-        if ([UIApplication sharedApplication].applicationState == UIApplicationStateActive) {
-            presentTouchID();
-        } else {
-            self.onApplicationDidBecomeActiveBlock = ^{
-                presentTouchID();
-            };
-        }
-    }
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    
+    if (self.type == DHPasscodeViewControllerTypeAuthenticate && self.passcodeManager.touchIDEnabled) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self presentTouchIdWithCompletionBlock:^(BOOL success, NSError *error) {
+                if (self.completionBlock) {
+                    self.completionBlock(self, success, error);
+                }
+            }];
+        });
+    }
 }
 
 - (void)viewDidLayoutSubviews {
@@ -318,19 +292,29 @@
 }
 
 - (void)presentTouchIdWithCompletionBlock:(void (^)(BOOL success, NSError *error))completionBlock {
-    
+
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
     LAContext *context = [[LAContext alloc] init];
     
-    [context evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
-            localizedReason:NSLocalizedString(@"Unlock Access", @"Unlock Access")
-                      reply:^(BOOL success, NSError *error) {
-                          dispatch_async(dispatch_get_main_queue(), ^{
-                              if (completionBlock) {
-                                  completionBlock(success, error);
-                              }
-                          });
-                      }];
+    NSError *authError;
+    if ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:&authError]) {
+        [context evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
+                localizedReason:NSLocalizedString(@"Unlock Access", @"Unlock Access")
+                          reply:^(BOOL success, NSError *error) {
+                              dispatch_async(dispatch_get_main_queue(), ^{
+                                  if (completionBlock) {
+                                      completionBlock(success, error);
+                                  }
+                              });
+                          }];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (completionBlock) {
+                completionBlock(NO, authError);
+            }
+        });
+    }
+    
 #else
     if (completionBlock) {
         completionBlock(NO);
