@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name         = "DHPasscodeManager"
   s.author       = { "Don Holly" => "don.holly@gmail.com" }
-  s.version      = "0.9.3"
+  s.version      = "0.9.4"
   s.summary      = "The easiest way to add a passcode and TouchID support to your iOS App."
   s.license      = { :type => 'MIT', :text => <<-LICENSE
                       The MIT License (MIT)
