@@ -157,6 +157,7 @@
     [self.view addSubview:self.passcodeButton9];
     
     self.cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.cancelButton.titleLabel.adjustsFontSizeToFitWidth = YES;
     [self.view addSubview:self.cancelButton];
     
     [self setupSignals];
