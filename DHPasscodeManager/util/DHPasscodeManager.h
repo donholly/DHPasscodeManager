@@ -28,8 +28,6 @@
 
 #define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TOUCHID_ENABLED                         @"DHPasscodeManager_touchid_enabled"
 
-#define DH_PASSCODE_DELIMITER                                                     @"-"
-
 typedef void (^DHPasscodeManagerCompletionBlock)(BOOL success, NSError *error);
 
 @interface DHPasscodeManager : NSObject
@@ -64,7 +62,7 @@ typedef void (^DHPasscodeManagerCompletionBlock)(BOOL success, NSError *error);
  *
  *  Defaults to 60 seconds
  */
-@property (nonatomic) NSTimeInterval passcodeTimeInternal;
+@property (nonatomic) NSTimeInterval passcodeTimeInterval;
 
 + (instancetype)sharedInstance;
 

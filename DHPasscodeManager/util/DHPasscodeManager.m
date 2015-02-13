@@ -26,7 +26,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
 @implementation DHPasscodeManager
 
 @dynamic passcodeEnabled;
-@dynamic passcodeTimeInternal;
+@dynamic passcodeTimeInterval;
 @dynamic touchIDEnabled;
 
 - (void)dealloc {
@@ -123,26 +123,13 @@ static NSDateFormatter *_lastActiveDateFormatter;
 
 - (void)handleApplicationNotification:(NSNotification *)notification {
     
-    void (^handleApplicationLock)() = ^() {
-        if ([self shouldRequirePasscode]) {
-            // We do this on the next runloop to avoid:
-            // Unbalanced calls to begin/end appearance transitions for <UIViewController>
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self authenticateUserAnimated:self.animatePresentationAndDismissal
-                               completionBlock:^(BOOL success, NSError *error) {
-
-                               }];
-            });
-        }
-    };
-    
     // Fresh launch
     if ([notification.name isEqualToString:UIApplicationDidFinishLaunchingNotification]) {
-        handleApplicationLock();
+        [self handleApplicationLock];
     }
     // Back from background
     else if ([notification.name isEqualToString:UIApplicationWillEnterForegroundNotification]) {
-        handleApplicationLock();
+        [self handleApplicationLock];
     }
     // Sent to background
     else if ([notification.name isEqualToString:UIApplicationDidEnterBackgroundNotification]) {
@@ -158,6 +145,20 @@ static NSDateFormatter *_lastActiveDateFormatter;
     }
 }
 
+- (void)handleApplicationLock {
+    if ([self shouldRequirePasscode]) {
+        // We do this on the next runloop to avoid:
+        // Unbalanced calls to begin/end appearance transitions for <UIViewController>
+        // removed for now. may need to put this back!
+//        dispatch_async(dispatch_get_main_queue(), ^{
+            [self authenticateUserAnimated:self.animatePresentationAndDismissal
+                           completionBlock:^(BOOL success, NSError *error) {
+                               
+                           }];
+//        });
+    }
+}
+
 - (BOOL)shouldRequirePasscode {
 
     NSDate *lastActive = self.lastActiveDate;
@@ -165,7 +166,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
     BOOL passcodeEnabled = self.passcodeEnabled;
     
     NSTimeInterval currentInterval = [[NSDate date] timeIntervalSinceDate:lastActive];
-    BOOL timeRequirement = (currentInterval >= self.passcodeTimeInternal);
+    BOOL timeRequirement = (currentInterval >= self.passcodeTimeInterval);
     
     return passcodeEnabled && timeRequirement;
 }
@@ -316,7 +317,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
     }
 }
 
-- (NSTimeInterval)passcodeTimeInternal {
+- (NSTimeInterval)passcodeTimeInterval {
     NSError *error;
     NSString *value = [SSKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
                                              account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_INTERVAL
@@ -333,9 +334,9 @@ static NSDateFormatter *_lastActiveDateFormatter;
     return [value doubleValue];
 }
 
-- (void)setPasscodeTimeInternal:(NSTimeInterval)passcodeTimeinternal {
+- (void)setPasscodeTimeInterval:(NSTimeInterval)passcodeTimeinterval {
     NSError *error;
-    BOOL success = [SSKeychain setPassword:[NSString stringWithFormat:@"%@", @(passcodeTimeinternal)]
+    BOOL success = [SSKeychain setPassword:[NSString stringWithFormat:@"%@", @(passcodeTimeinterval)]
                                 forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_INTERVAL
                                      error:&error];
@@ -486,7 +487,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
                          self.window.alpha = 1.0f;
                      }
                      completion:^(BOOL finished) {
-                         
+                         [self.passcodeViewController viewControllerWasDisplayed];
                      }];
 }
 

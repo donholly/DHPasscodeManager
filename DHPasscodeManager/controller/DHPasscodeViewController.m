@@ -14,18 +14,19 @@
 
 #import <AudioToolbox/AudioServices.h>
 
-#define DH_PASSCODE_BUTTON_SIZE 60.0f
+#define DH_PASSCODE_BUTTON_SIZE      60.0f
 #define DH_PASSCODE_BUTTON_SPACING_X 25.0f
 #define DH_PASSCODE_BUTTON_SPACING_Y 15.0f
 
-#define DH_PASSCODE_DOT_SIZE 10.0f
-#define DH_PASSCODE_DOT_SPACING 15.0f
+#define DH_PASSCODE_DOT_SIZE         10.0f
+#define DH_PASSCODE_DOT_SPACING      15.0f
 
-#define DH_PASSCODE_SPACING 10.0f
+#define DH_PASSCODE_SPACING          10.0f
 
 // Changing this would break things right now
 // TODO: support variable length passcodes one day?
-#define DH_PASSCODE_LENGTH 4
+#define DH_PASSCODE_LENGTH           4
+#define DH_PASSCODE_DELIMITER        @"-"
 
 @interface DHPasscodeViewController ()
 @property (nonatomic, strong) UIImageView *logoImageView;
@@ -171,7 +172,9 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    
+}
+
+- (void)viewControllerWasDisplayed {
     if (self.type == DHPasscodeViewControllerTypeAuthenticate && self.passcodeManager.touchIDEnabled) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [self presentTouchIdWithCompletionBlock:^(BOOL success, NSError *error) {

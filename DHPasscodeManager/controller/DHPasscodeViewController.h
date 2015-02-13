@@ -35,4 +35,6 @@ typedef void (^DHPasscodeManagerViewControllerCompletionBlock)(DHPasscodeViewCon
 
 @property (nonatomic, weak) DHPasscodeManagerStyle *style;
 
+- (void)viewControllerWasDisplayed;
+
 @end
