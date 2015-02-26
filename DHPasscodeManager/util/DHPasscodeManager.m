@@ -63,7 +63,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
         _lastActiveDateFormatter = [NSDateFormatter new];
         _lastActiveDateFormatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
         [_lastActiveDateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSSSSS"];
-    
+        
         [self addApplicationObservers];
     }
     
@@ -135,7 +135,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
     // Sent to background
     else if ([notification.name isEqualToString:UIApplicationDidEnterBackgroundNotification]) {
         if (self.currentlyAuthenticated) {
-            [self markLastActiveNow];
+            [self markLastActive:[NSDate date]];
         }
     }
     // Will resign active state
@@ -148,15 +148,15 @@ static NSDateFormatter *_lastActiveDateFormatter;
     }
     // About to terminate (forced closed by system or user)
     else if ([notification.name isEqualToString:UIApplicationWillTerminateNotification]) {
-        if (self.currentlyAuthenticated) {
-            [self markLastActiveNow];
-        }
+        // Mark last active the minimum time ago it would require a passcode for next launch
+        [self markLastActive:[[NSDate date] dateByAddingTimeInterval:-self.passcodeTimeInterval]];
     }
     
     self.previousApplicationState = notification.name;
 }
 
 - (void)handleApplicationLock {
+    
     if ([self shouldRequirePasscode]) {
         self.currentlyAuthenticated = NO;
         [self authenticateUserAnimated:self.animatePresentationAndDismissal
@@ -187,7 +187,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
 }
 
 - (BOOL)shouldRequirePasscode {
-
+    
     NSDate *lastActive = self.lastActiveDate;
     
     BOOL passcodeEnabled = self.passcodeEnabled;
@@ -217,9 +217,9 @@ static NSDateFormatter *_lastActiveDateFormatter;
     return date;
 }
 
-- (void)markLastActiveNow {
+- (void)markLastActive:(NSDate *)date {
     NSError *error;
-    NSString *lastSeenDate = [NSString stringWithFormat:@"%@", [_lastActiveDateFormatter stringFromDate:[NSDate date]]];
+    NSString *lastSeenDate = [NSString stringWithFormat:@"%@", [_lastActiveDateFormatter stringFromDate:date]];
     BOOL success = [SSKeychain setPassword:lastSeenDate
                                 forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_LAST_SEEN
@@ -236,7 +236,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
     _currentlyAuthenticated = currentlyAuthenticated;
     
     if (currentlyAuthenticated) {
-        [self markLastActiveNow];
+        [self markLastActive:[NSDate date]];
     }
 }
 
@@ -520,7 +520,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
 #pragma mark - Present / Dismiss Passcode Window -
 
 - (void)presentPasscodeWindowAnimated:(BOOL)animated {
-
+    
     CGFloat animationDuration = animated ? DH_PASSCODE_ANIMATION_DURATION_DEFAULT : 0;
     
     self.window.frame = [[UIScreen mainScreen] bounds];
@@ -543,7 +543,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
         NSLog(@"Invalid WindowLevel: %@", @(keyWindow.windowLevel));
         return;
     }
-
+    
     [keyWindow addSubview:self.window];
     
     [UIView animateWithDuration:animationDuration
@@ -556,7 +556,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
 }
 
 - (void)dismissPasscodeWindowAnimated:(BOOL)animated {
-
+    
     CGFloat animationDuration = animated ? DH_PASSCODE_ANIMATION_DURATION_DEFAULT : 0;
     
     [UIView animateWithDuration:animationDuration
