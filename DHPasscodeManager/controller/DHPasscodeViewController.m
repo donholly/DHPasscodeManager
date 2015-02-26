@@ -52,6 +52,8 @@
 @property (nonatomic, strong) DHPasscodeButton *passcodeButton9;
 @property (nonatomic, strong) UIButton *cancelButton;
 
+@property (nonatomic, strong) UIImageView *resignActiveImageView;
+
 @property (nonatomic, strong) NSMutableArray *firstInput;
 @property (nonatomic, strong) NSMutableArray *secondInput;
 @property (nonatomic, strong) NSMutableArray *thirdInput;
@@ -160,6 +162,13 @@
     self.cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
     self.cancelButton.titleLabel.adjustsFontSizeToFitWidth = YES;
     [self.view addSubview:self.cancelButton];
+    
+    // Resign active image overlay
+    self.resignActiveImageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
+    self.resignActiveImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.resignActiveImageView.contentMode = UIViewContentModeScaleAspectFit;
+    self.resignActiveImageView.backgroundColor = [UIColor redColor];
+    [self.view addSubview:self.resignActiveImageView];
     
     [self setupSignals];
 }
@@ -372,6 +381,8 @@
                }
                case DHPasscodeViewControllerTypeRemove:
                    return NSLocalizedString(@"Enter your current passcode to disable", @"Enter your current passcode to disable");
+               case DHPasscodeViewControllerTypeApplicationCovers:
+                   return nil;
                default:
                    NSLog(@"Unknown DHPasscodeViewControllerType: %@", type);
                    return nil;
@@ -615,6 +626,17 @@
             }
         }
     }];
+    
+    [[RACSignal combineLatest:@[typeSignal]] subscribeNext:^(RACTuple *tuple) {
+        @strongify(self);
+        
+        if (self.type == DHPasscodeViewControllerTypeApplicationCovers) {
+            self.resignActiveImageView.image = [self launchImage];
+            self.resignActiveImageView.hidden = NO;
+        } else {
+            self.resignActiveImageView.hidden = YES;
+        }
+    }];
 }
 
 - (BOOL)passcodeEntryIsValid:(NSArray *)passcodeEntry {
@@ -806,6 +828,97 @@
                                                 interval:interval
                                          completionBlock:completionBlock];
                      }];
+}
+
+#pragma mark - Launch Image -
+
+- (UIImage *)launchImage {
+    
+    CGFloat screenScale = [UIScreen mainScreen].scale;
+    UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+    BOOL ios7orLater = [[UIDevice currentDevice].systemVersion floatValue] >= 7.0f;
+    BOOL ios8orLater = [[UIDevice currentDevice].systemVersion floatValue] >= 8.0f;
+    
+    NSString *baseName = @"LaunchImage";
+    NSString *iosVersionModifier;
+    NSString *orientationModifier = UIDeviceOrientationIsPortrait(orientation) ? @"Portrait" : @"Landscape";
+    NSString *scaleModifier = (screenScale == 3 ? @"3x" : (screenScale == 2 ? @"2x" : @""));
+    NSString *extension = @".png";
+    
+    NSString *launchImageName;
+    
+    if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+        
+        /*
+         LaunchImage-700-Landscape@2x~ipad.png
+         LaunchImage-700-Landscape~ipad.png
+         
+         LaunchImage-700-Portrait@2x~ipad.png
+         LaunchImage-700-Portrait~ipad.png
+         
+         LaunchImage-Landscape@2x~ipad.png
+         LaunchImage-Landscape~ipad.png
+         
+         LaunchImage-Portrait@2x~ipad.png
+         LaunchImage-Portrait~ipad.png
+         */
+        
+        iosVersionModifier = ios7orLater ? @"-700-" : @"";
+        
+        launchImageName = [NSString stringWithFormat:@"%@%@%@%@%@%@",
+                           baseName,
+                           iosVersionModifier,
+                           orientation,
+                           scaleModifier,
+                           @"~ipad",
+                           extension];
+        
+    } else {
+        
+        /*
+         LaunchImage-568h@2x.png
+         LaunchImage-700-568h@2x.png
+         
+         LaunchImage-700@2x.png
+         LaunchImage-800-667h@2x.png
+         
+         LaunchImage-800-Landscape-736h@3x.png
+         LaunchImage-800-Portrait-736h@3x.png
+         
+         LaunchImage.png
+         LaunchImage@2x.png
+         */
+        
+        // iPhone5/5s/iPod5
+        if([[UIScreen mainScreen] bounds].size.height == 568 || [[UIScreen mainScreen] bounds].size.width == 568) {
+            if (ios7orLater) {
+                launchImageName = @"LaunchImage-700-568h@2x.png";
+            } else {
+                launchImageName = @"LaunchImage-568h@2x.png";
+            }
+        }
+        // iPhone6
+        else if([[UIScreen mainScreen] bounds].size.height == 667 || [[UIScreen mainScreen] bounds].size.width == 667) {
+            launchImageName = @"LaunchImage-800-667h@2x.png";
+        }
+        // iPhone6 Plus
+        else if([[UIScreen mainScreen] bounds].size.height == 736 || [[UIScreen mainScreen] bounds].size.width == 736) {
+            launchImageName = @"LaunchImage-800-Portrait-736h@3x.png";
+        }
+        // All other iPhones
+        else {
+            if (ios7orLater) {
+                launchImageName = @"LaunchImage-700@2x.png";
+            } else {
+                launchImageName = [NSString stringWithFormat:@"%@%@%@",
+                                   baseName,
+                                   scaleModifier,
+                                   extension];
+            }
+        }
+    }
+    
+    return [UIImage imageNamed:launchImageName];
 }
 
 @end

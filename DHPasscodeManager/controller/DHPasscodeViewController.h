@@ -18,7 +18,8 @@ typedef NS_ENUM(NSUInteger, DHPasscodeViewControllerType) {
     DHPasscodeViewControllerTypeAuthenticate,
     DHPasscodeViewControllerTypeCreateNew,
     DHPasscodeViewControllerTypeChangeExisting,
-    DHPasscodeViewControllerTypeRemove
+    DHPasscodeViewControllerTypeRemove,
+    DHPasscodeViewControllerTypeApplicationCovers
 };
 
 @class DHPasscodeViewController;

@@ -19,6 +19,7 @@ static DHPasscodeManager *_sharedInstance;
 @property (nonatomic, strong) UIWindow *window;
 @property (nonatomic, strong) DHPasscodeViewController *passcodeViewController;
 @property (nonatomic) BOOL currentlyAuthenticated;
+@property (nonatomic) NSString *previousApplicationState;
 @end
 
 static NSDateFormatter *_lastActiveDateFormatter;
@@ -51,7 +52,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
     if ((self = [super init])) {
         
         self.window = [[UIWindow alloc] initWithFrame:CGRectZero];
-        self.window.windowLevel = UIWindowLevelNormal;
+        self.window.windowLevel = UIWindowLevelStatusBar + 2; // +2 to go above MTStatusBarOverlay (this may not be a good idea)
         
         self.style = [[DHPasscodeManagerStyle alloc] init];
         
@@ -137,25 +138,51 @@ static NSDateFormatter *_lastActiveDateFormatter;
             [self markLastActiveNow];
         }
     }
+    // Will resign active state
+    else if ([notification.name isEqualToString:UIApplicationWillResignActiveNotification]) {
+        [self handleApplicationActiveStateChange:NO];
+    }
+    // Did re-gain active state
+    else if ([notification.name isEqualToString:UIApplicationDidBecomeActiveNotification]) {
+        [self handleApplicationActiveStateChange:YES];
+    }
     // About to terminate (forced closed by system or user)
     else if ([notification.name isEqualToString:UIApplicationWillTerminateNotification]) {
         if (self.currentlyAuthenticated) {
             [self markLastActiveNow];
         }
     }
+    
+    self.previousApplicationState = notification.name;
 }
 
 - (void)handleApplicationLock {
     if ([self shouldRequirePasscode]) {
-        // We do this on the next runloop to avoid:
-        // Unbalanced calls to begin/end appearance transitions for <UIViewController>
-        // removed for now. may need to put this back!
-//        dispatch_async(dispatch_get_main_queue(), ^{
-            [self authenticateUserAnimated:self.animatePresentationAndDismissal
-                           completionBlock:^(BOOL success, NSError *error) {
-                               
-                           }];
-//        });
+        self.currentlyAuthenticated = NO;
+        [self authenticateUserAnimated:self.animatePresentationAndDismissal
+                       completionBlock:^(BOOL success, NSError *error) {
+                           
+                       }];
+    } else {
+        if (self.currentlyAuthenticated) {
+            [self dismissPasscodeWindowAnimated:self.animatePresentationAndDismissal];
+        }
+    }
+}
+
+- (void)handleApplicationActiveStateChange:(BOOL)currentlyActive {
+    
+    if (currentlyActive) {
+        if ([self.previousApplicationState isEqualToString:UIApplicationWillResignActiveNotification] && self.currentlyAuthenticated) {
+            [self dismissPasscodeWindowAnimated:self.animatePresentationAndDismissal];
+        }
+    } else {
+        if (![self.previousApplicationState isEqualToString:UIApplicationDidBecomeActiveNotification] || self.currentlyAuthenticated) {
+            [self showApplicationCovers:self.animatePresentationAndDismissal
+                        completionBlock:^(BOOL success, NSError *error) {
+                            
+                        }];
+        }
     }
 }
 
@@ -348,6 +375,27 @@ static NSDateFormatter *_lastActiveDateFormatter;
 
 #pragma mark - Passcode Manipulation -
 
+- (void)showApplicationCovers:(BOOL)animated
+              completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
+    
+    if (!self.passcodeEnabled) {
+        if (completionBlock) {
+            completionBlock(NO, [NSError errorWithDomain:@"DHPasscodeErrorDomain"
+                                                    code:0
+                                                userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"A passcode is not currently set", @"A passcode is not currently set")}]);
+        }
+        return;
+    }
+    
+    self.passcodeViewController.type = DHPasscodeViewControllerTypeApplicationCovers;
+    
+    [self presentPasscodeWindowAnimated:animated];
+    
+    if (completionBlock) {
+        completionBlock(YES, nil);
+    }
+}
+
 - (void)authenticateUserAnimated:(BOOL)animated
                  completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
     
@@ -477,10 +525,26 @@ static NSDateFormatter *_lastActiveDateFormatter;
     
     self.window.frame = [[UIScreen mainScreen] bounds];
     [self.window setRootViewController:self.passcodeViewController];
-    self.window.alpha = 0.0f;
+    self.window.alpha = self.window.hidden ? 0.0f : self.window.alpha;
     self.window.hidden = NO;
     
-    [[UIApplication sharedApplication].keyWindow addSubview:self.window];
+    UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
+    
+    if (keyWindow.windowLevel != UIWindowLevelNormal || keyWindow.frame.size.height == 20) {
+#ifdef DEBUG
+        NSString *message = [NSString stringWithFormat:@"Please take a screenshot of this and show Don!\n\nKey Window: %@\n\n(This won't be visible to other users)", keyWindow.description];
+        
+        [[[UIAlertView alloc] initWithTitle:@"You found a bug"
+                                    message:message
+                                   delegate:nil
+                          cancelButtonTitle:@"Okay"
+                          otherButtonTitles:nil] show];
+#endif
+        NSLog(@"Invalid WindowLevel: %@", @(keyWindow.windowLevel));
+        return;
+    }
+
+    [keyWindow addSubview:self.window];
     
     [UIView animateWithDuration:animationDuration
                      animations:^{
