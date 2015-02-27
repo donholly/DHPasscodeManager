@@ -528,24 +528,6 @@ static NSDateFormatter *_lastActiveDateFormatter;
     self.window.alpha = self.window.hidden ? 0.0f : self.window.alpha;
     self.window.hidden = NO;
     
-    UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
-    
-    if (keyWindow.windowLevel != UIWindowLevelNormal || keyWindow.frame.size.height == 20) {
-#ifdef DEBUG
-        NSString *message = [NSString stringWithFormat:@"Please take a screenshot of this and show Don!\n\nKey Window: %@\n\n(This won't be visible to other users)", keyWindow.description];
-        
-        [[[UIAlertView alloc] initWithTitle:@"You found a bug"
-                                    message:message
-                                   delegate:nil
-                          cancelButtonTitle:@"Okay"
-                          otherButtonTitles:nil] show];
-#endif
-        NSLog(@"Invalid WindowLevel: %@", @(keyWindow.windowLevel));
-        return;
-    }
-    
-    [keyWindow addSubview:self.window];
-    
     [UIView animateWithDuration:animationDuration
                      animations:^{
                          self.window.alpha = 1.0f;
