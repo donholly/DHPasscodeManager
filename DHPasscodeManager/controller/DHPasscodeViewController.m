@@ -167,7 +167,7 @@
     self.resignActiveImageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
     self.resignActiveImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.resignActiveImageView.contentMode = UIViewContentModeScaleAspectFit;
-    self.resignActiveImageView.backgroundColor = [UIColor redColor];
+    self.resignActiveImageView.backgroundColor = [UIColor whiteColor];
     [self.view addSubview:self.resignActiveImageView];
     
     [self setupSignals];
@@ -842,7 +842,7 @@
     NSString *baseName = @"LaunchImage";
     NSString *iosVersionModifier;
     NSString *orientationModifier = UIDeviceOrientationIsPortrait(orientation) ? @"Portrait" : @"Landscape";
-    NSString *scaleModifier = (screenScale == 3 ? @"3x" : (screenScale == 2 ? @"2x" : @""));
+    NSString *scaleModifier = (screenScale == 3 ? @"@3x" : (screenScale == 2 ? @"@2x" : @""));
     NSString *extension = @".png";
     
     NSString *launchImageName;
@@ -863,12 +863,12 @@
          LaunchImage-Portrait~ipad.png
          */
         
-        iosVersionModifier = ios7orLater ? @"-700-" : @"";
+        iosVersionModifier = ios7orLater ? @"-700-" : @"-";
         
         launchImageName = [NSString stringWithFormat:@"%@%@%@%@%@%@",
                            baseName,
                            iosVersionModifier,
-                           orientation,
+                           orientationModifier,
                            scaleModifier,
                            @"~ipad",
                            extension];
