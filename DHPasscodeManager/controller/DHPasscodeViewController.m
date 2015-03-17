@@ -909,7 +909,9 @@
         else {
             if (ios7orLater) {
                 launchImageName = @"LaunchImage-700@2x.png";
-            } else {
+            }
+            
+            if (!launchImageName || [UIImage imageNamed:launchImageName].size.width == 0) {
                 launchImageName = [NSString stringWithFormat:@"%@%@%@",
                                    baseName,
                                    scaleModifier,
