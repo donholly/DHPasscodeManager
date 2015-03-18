@@ -835,13 +835,12 @@
 - (UIImage *)launchImage {
     
     CGFloat screenScale = [UIScreen mainScreen].scale;
-    UIDeviceOrientation orientation = [UIDevice currentDevice].orientation;
+    UIInterfaceOrientation statusBarOrientation = [UIApplication sharedApplication].statusBarOrientation;
     BOOL ios7orLater = [[UIDevice currentDevice].systemVersion floatValue] >= 7.0f;
-    BOOL ios8orLater = [[UIDevice currentDevice].systemVersion floatValue] >= 8.0f;
     
     NSString *baseName = @"LaunchImage";
     NSString *iosVersionModifier;
-    NSString *orientationModifier = UIDeviceOrientationIsPortrait(orientation) ? @"Portrait" : @"Landscape";
+    NSString *orientationModifier = UIInterfaceOrientationIsPortrait(statusBarOrientation) ? @"Portrait" : @"Landscape";
     NSString *scaleModifier = (screenScale == 3 ? @"@3x" : (screenScale == 2 ? @"@2x" : @""));
     NSString *extension = @".png";
     
