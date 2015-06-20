@@ -173,14 +173,15 @@
     [self setupSignals];
 }
 
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self loadStyle];
+}
+
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
     [self resetInput];
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
 }
 
 - (void)viewControllerWasDisplayed {
@@ -657,19 +658,20 @@
     [self addStyleObservers];
     
     [self loadStyle];
-    
-    [self.dotViews enumerateObjectsUsingBlock:^(DHPasscodeDotView *dotView, NSUInteger idx, BOOL *stop) {
-        dotView.style = style;
-    }];
-    
-    [self.passcodeButtons enumerateObjectsUsingBlock:^(DHPasscodeButton *passcodeButton, NSUInteger idx, BOOL *stop) {
-        passcodeButton.style = style;
-    }];
 }
 
 - (void)loadStyle {
-    self.view.backgroundColor = self.style.backgroundColor;
-    
+    if (self.isViewLoaded) {
+        self.view.backgroundColor = self.style.backgroundColor;
+        [self.dotViews enumerateObjectsUsingBlock:^(DHPasscodeDotView *dotView, NSUInteger idx, BOOL *stop) {
+            dotView.style = self.style;
+        }];
+
+        [self.passcodeButtons enumerateObjectsUsingBlock:^(DHPasscodeButton *passcodeButton, NSUInteger idx, BOOL *stop) {
+            passcodeButton.style = self.style;
+        }];
+    }
+
     self.logoImageView.image = self.style.logoImage;
     
     self.cancelButton.titleLabel.font = self.style.cancelButtonTextFont;
