@@ -83,7 +83,9 @@
 }
 
 - (NSUInteger)supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskPortrait;
+    return ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone
+            ? UIInterfaceOrientationMaskPortrait
+            : UIInterfaceOrientationMaskAll);
 }
 
 - (void)loadView {
