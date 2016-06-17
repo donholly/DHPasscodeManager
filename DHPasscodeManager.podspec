@@ -25,6 +25,7 @@ Pod::Spec.new do |s|
                   }
   s.homepage     = "https://www.github.com/donholly/DHPasscodeManager"
   s.requires_arc = true
+  s.ios.deployment_target = "8.0"
 
   s.source       = { :git => "https://github.com/donholly/DHPasscodeManager.git" }
   s.source_files = "DHPasscodeManager/**/*.{h,m}"
