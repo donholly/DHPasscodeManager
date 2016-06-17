@@ -23,7 +23,7 @@ Pod::Spec.new do |s|
                       THE SOFTWARE.
                       LICENSE
                   }
-  
+  s.homepage     = "https://www.github.com/everalbum/DHPasscodeManager"
   s.requires_arc = true
 
   s.source       = { :git => "https://github.com/donholly/DHPasscodeManager.git" }
