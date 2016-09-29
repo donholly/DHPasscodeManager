@@ -1,7 +1,7 @@
 PODS:
-  - DHPasscodeManager (0.9.0):
+  - DHPasscodeManager (0.9.6):
     - ReactiveCocoa (= 2.3.1)
-    - SSKeychain
+    - SAMKeychain
   - ReactiveCocoa (2.3.1):
     - ReactiveCocoa/UI (= 2.3.1)
   - ReactiveCocoa/Core (2.3.1):
@@ -9,7 +9,7 @@ PODS:
   - ReactiveCocoa/no-arc (2.3.1)
   - ReactiveCocoa/UI (2.3.1):
     - ReactiveCocoa/Core
-  - SSKeychain (1.2.2)
+  - SAMKeychain (1.5.1)
 
 DEPENDENCIES:
   - DHPasscodeManager (from `../`)
@@ -19,8 +19,10 @@ EXTERNAL SOURCES:
     :path: ../
 
 SPEC CHECKSUMS:
-  DHPasscodeManager: 653106dccd49884128321d489e604a922462784c
-  ReactiveCocoa: dca75777b9d18990c8714a3a6f2149f29b4d1462
-  SSKeychain: cc48bd3ad24fcd9125adb9e0d23dd50b8bbd08b9
+  DHPasscodeManager: 7fa77c0799d90a1cc7f597cba8fd2520f2860327
+  ReactiveCocoa: 3fe9b233ca6db810e86681b5749488564c1179a1
+  SAMKeychain: 6b04852a20684167aea97bdf8ba12c95d3616376
 
-COCOAPODS: 0.35.0.rc2
+PODFILE CHECKSUM: 575c84c39968aacf1fc00c4432c80b2016c62f42
+
+COCOAPODS: 1.0.1

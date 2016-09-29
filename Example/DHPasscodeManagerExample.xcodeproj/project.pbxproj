@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9640F243B1933A2B8A0A8315 /* libPods-DHPasscodeManagerExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A4CD380E847452D6CE23FA2A /* libPods-DHPasscodeManagerExample.a */; };
+		A2F113F52196A0B31AE43ACF /* libPods-DHPasscodeManagerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B9E59F75CCD8C19B8FFB5382 /* libPods-DHPasscodeManagerTests.a */; };
+		F1CBF14FF74118383424A207 /* libPods-DHPasscodeManagerExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2528067689D41B2AF4D8A203 /* libPods-DHPasscodeManagerExample.a */; };
 		F64462CC1A193C2100DE8725 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F64462CB1A193C2100DE8725 /* main.m */; };
 		F64462CF1A193C2100DE8725 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F64462CE1A193C2100DE8725 /* AppDelegate.m */; };
 		F64462D21A193C2100DE8725 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F64462D11A193C2100DE8725 /* ViewController.m */; };
@@ -30,9 +31,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0698569068417F448E79536D /* Pods-DHPasscodeManagerExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DHPasscodeManagerExample.release.xcconfig"; path = "Pods/Target Support Files/Pods-DHPasscodeManagerExample/Pods-DHPasscodeManagerExample.release.xcconfig"; sourceTree = "<group>"; };
-		2A17531EDE02E4602188D7A1 /* Pods-DHPasscodeManagerExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DHPasscodeManagerExample.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DHPasscodeManagerExample/Pods-DHPasscodeManagerExample.debug.xcconfig"; sourceTree = "<group>"; };
-		A4CD380E847452D6CE23FA2A /* libPods-DHPasscodeManagerExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DHPasscodeManagerExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2528067689D41B2AF4D8A203 /* libPods-DHPasscodeManagerExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DHPasscodeManagerExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		35D65E8678B08CBDF0A90381 /* Pods-DHPasscodeManagerExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DHPasscodeManagerExample.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DHPasscodeManagerExample/Pods-DHPasscodeManagerExample.debug.xcconfig"; sourceTree = "<group>"; };
+		5723727A73D98448934D0AB1 /* Pods-DHPasscodeManagerExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DHPasscodeManagerExample.release.xcconfig"; path = "Pods/Target Support Files/Pods-DHPasscodeManagerExample/Pods-DHPasscodeManagerExample.release.xcconfig"; sourceTree = "<group>"; };
+		701087DAEAF978DFDDAEF82C /* Pods-DHPasscodeManagerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DHPasscodeManagerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-DHPasscodeManagerTests/Pods-DHPasscodeManagerTests.release.xcconfig"; sourceTree = "<group>"; };
+		B9E59F75CCD8C19B8FFB5382 /* libPods-DHPasscodeManagerTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DHPasscodeManagerTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C70F2F1A863DFDF32560F937 /* Pods-DHPasscodeManagerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DHPasscodeManagerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DHPasscodeManagerTests/Pods-DHPasscodeManagerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		F64462C61A193C2100DE8725 /* DHPasscodeManagerExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DHPasscodeManagerExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F64462CA1A193C2100DE8725 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F64462CB1A193C2100DE8725 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -55,7 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9640F243B1933A2B8A0A8315 /* libPods-DHPasscodeManagerExample.a in Frameworks */,
+				F1CBF14FF74118383424A207 /* libPods-DHPasscodeManagerExample.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,27 +67,31 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A2F113F52196A0B31AE43ACF /* libPods-DHPasscodeManagerTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1591F0AD29EA56C16D83C2B3 /* Pods */ = {
+		27BEAFFB085B999301BF23D4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				2A17531EDE02E4602188D7A1 /* Pods-DHPasscodeManagerExample.debug.xcconfig */,
-				0698569068417F448E79536D /* Pods-DHPasscodeManagerExample.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
-		C49C4B3BDC52B63641C8F567 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				A4CD380E847452D6CE23FA2A /* libPods-DHPasscodeManagerExample.a */,
+				2528067689D41B2AF4D8A203 /* libPods-DHPasscodeManagerExample.a */,
+				B9E59F75CCD8C19B8FFB5382 /* libPods-DHPasscodeManagerTests.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9777204F035F8062614791A1 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				35D65E8678B08CBDF0A90381 /* Pods-DHPasscodeManagerExample.debug.xcconfig */,
+				5723727A73D98448934D0AB1 /* Pods-DHPasscodeManagerExample.release.xcconfig */,
+				C70F2F1A863DFDF32560F937 /* Pods-DHPasscodeManagerTests.debug.xcconfig */,
+				701087DAEAF978DFDDAEF82C /* Pods-DHPasscodeManagerTests.release.xcconfig */,
+			);
+			name = Pods;
 			sourceTree = "<group>";
 		};
 		F64462BD1A193C2100DE8725 = {
@@ -92,8 +100,8 @@
 				F64462C81A193C2100DE8725 /* DHPasscodeManager */,
 				F64462E21A193C2100DE8725 /* DHPasscodeManagerTests */,
 				F64462C71A193C2100DE8725 /* Products */,
-				1591F0AD29EA56C16D83C2B3 /* Pods */,
-				C49C4B3BDC52B63641C8F567 /* Frameworks */,
+				9777204F035F8062614791A1 /* Pods */,
+				27BEAFFB085B999301BF23D4 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -156,11 +164,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = F64462E91A193C2100DE8725 /* Build configuration list for PBXNativeTarget "DHPasscodeManagerExample" */;
 			buildPhases = (
-				168C5039CD20F8D840D7DD62 /* Check Pods Manifest.lock */,
+				5D23AED3A6CF1621F23259BC /* [CP] Check Pods Manifest.lock */,
 				F64462C21A193C2100DE8725 /* Sources */,
 				F64462C31A193C2100DE8725 /* Frameworks */,
 				F64462C41A193C2100DE8725 /* Resources */,
-				A4CF4F7C5EFE3E3186F7B7CB /* Copy Pods Resources */,
+				94300F01907CC4105ADB5001 /* [CP] Embed Pods Frameworks */,
+				14EC96FA7F712602CA76D4B0 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -175,9 +184,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = F64462EC1A193C2100DE8725 /* Build configuration list for PBXNativeTarget "DHPasscodeManagerTests" */;
 			buildPhases = (
+				EFF5371E1AD439B38CFC514D /* [CP] Check Pods Manifest.lock */,
 				F64462DB1A193C2100DE8725 /* Sources */,
 				F64462DC1A193C2100DE8725 /* Frameworks */,
 				F64462DD1A193C2100DE8725 /* Resources */,
+				4CCDE87F7FE066C6C9325334 /* [CP] Embed Pods Frameworks */,
+				D69C5BA41F5C6660E4586257 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -195,7 +207,7 @@
 		F64462BE1A193C2100DE8725 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0610;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "Don Holly";
 				TargetAttributes = {
 					F64462C51A193C2100DE8725 = {
@@ -249,14 +261,44 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		168C5039CD20F8D840D7DD62 /* Check Pods Manifest.lock */ = {
+		14EC96FA7F712602CA76D4B0 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Check Pods Manifest.lock";
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DHPasscodeManagerExample/Pods-DHPasscodeManagerExample-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		4CCDE87F7FE066C6C9325334 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DHPasscodeManagerTests/Pods-DHPasscodeManagerTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5D23AED3A6CF1621F23259BC /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -264,19 +306,49 @@
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
-		A4CF4F7C5EFE3E3186F7B7CB /* Copy Pods Resources */ = {
+		94300F01907CC4105ADB5001 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Copy Pods Resources";
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DHPasscodeManagerExample/Pods-DHPasscodeManagerExample-resources.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DHPasscodeManagerExample/Pods-DHPasscodeManagerExample-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D69C5BA41F5C6660E4586257 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DHPasscodeManagerTests/Pods-DHPasscodeManagerTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		EFF5371E1AD439B38CFC514D /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -343,15 +415,19 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -385,8 +461,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -394,6 +472,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -410,30 +489,33 @@
 		};
 		F64462EA1A193C2100DE8725 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2A17531EDE02E4602188D7A1 /* Pods-DHPasscodeManagerExample.debug.xcconfig */;
+			baseConfigurationReference = 35D65E8678B08CBDF0A90381 /* Pods-DHPasscodeManagerExample.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = DHPasscodeManager/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.donholly.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
 		F64462EB1A193C2100DE8725 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0698569068417F448E79536D /* Pods-DHPasscodeManagerExample.release.xcconfig */;
+			baseConfigurationReference = 5723727A73D98448934D0AB1 /* Pods-DHPasscodeManagerExample.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = DHPasscodeManager/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.donholly.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
 		F64462ED1A193C2100DE8725 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C70F2F1A863DFDF32560F937 /* Pods-DHPasscodeManagerTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -446,6 +528,7 @@
 				);
 				INFOPLIST_FILE = DHPasscodeManagerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.donholly.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DHPasscodeManager.app/DHPasscodeManager";
 			};
@@ -453,6 +536,7 @@
 		};
 		F64462EE1A193C2100DE8725 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 701087DAEAF978DFDDAEF82C /* Pods-DHPasscodeManagerTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -461,6 +545,7 @@
 				);
 				INFOPLIST_FILE = DHPasscodeManagerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.donholly.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DHPasscodeManager.app/DHPasscodeManager";
 			};

@@ -200,9 +200,9 @@ static NSDateFormatter *_lastActiveDateFormatter;
 
 - (NSDate *)lastActiveDate {
     NSError *error;
-    NSString *value = [SSKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                             account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_LAST_SEEN
-                                               error:&error];
+    NSString *value = [SAMKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                              account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_LAST_SEEN
+                                                error:&error];
     
     if (error && error.code != errSecItemNotFound) {
         NSLog(@"Error determining passcode interval: %@", error);
@@ -220,10 +220,10 @@ static NSDateFormatter *_lastActiveDateFormatter;
 - (void)markLastActive:(NSDate *)date {
     NSError *error;
     NSString *lastSeenDate = [NSString stringWithFormat:@"%@", [_lastActiveDateFormatter stringFromDate:date]];
-    BOOL success = [SSKeychain setPassword:lastSeenDate
-                                forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                   account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_LAST_SEEN
-                                     error:&error];
+    BOOL success = [SAMKeychain setPassword:lastSeenDate
+                                 forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_LAST_SEEN
+                                      error:&error];
     
     if (!success || (error && error.code != errSecItemNotFound)) {
         NSLog(@"Error setting last seen date: %@", error);
@@ -265,9 +265,9 @@ static NSDateFormatter *_lastActiveDateFormatter;
 
 - (BOOL)touchIDEnabled {
     NSError *error;
-    NSString *value = [SSKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                             account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TOUCHID_ENABLED
-                                               error:&error];
+    NSString *value = [SAMKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                              account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TOUCHID_ENABLED
+                                                error:&error];
     
     if (error && [error code] != errSecItemNotFound) {
         NSLog(@"Error determining if TouchID is enabled: %@", error);
@@ -284,10 +284,10 @@ static NSDateFormatter *_lastActiveDateFormatter;
 
 - (void)setTouchIDEnabled:(BOOL)touchIDEnabled {
     NSError *error;
-    BOOL success = [SSKeychain setPassword:[NSString stringWithFormat:@"%@", @(touchIDEnabled)]
-                                forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                   account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TOUCHID_ENABLED
-                                     error:&error];
+    BOOL success = [SAMKeychain setPassword:[NSString stringWithFormat:@"%@", @(touchIDEnabled)]
+                                 forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TOUCHID_ENABLED
+                                      error:&error];
     
     if (!success || error) {
         NSLog(@"Error setting TouchID to enabled/disabled: %@", error);
@@ -296,9 +296,9 @@ static NSDateFormatter *_lastActiveDateFormatter;
 
 - (BOOL)isPasscodeStored {
     NSError *error = nil;
-    NSString *passcode = [SSKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                                account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
-                                                  error:&error];
+    NSString *passcode = [SAMKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                                 account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                   error:&error];
     
     if (error && [error code] != errSecItemNotFound) {
         NSLog(@"Error fetching passcode from keychain: %@", [error localizedDescription]);
@@ -309,9 +309,9 @@ static NSDateFormatter *_lastActiveDateFormatter;
 
 - (BOOL)passcodeEnabled {
     NSError *error;
-    NSString *value = [SSKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                             account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_ENABLED
-                                               error:&error];
+    NSString *value = [SAMKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                              account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_ENABLED
+                                                error:&error];
     
     if (error && [error code] != errSecItemNotFound) {
         NSLog(@"Error determining if passcode is enabled: %@", error);
@@ -328,15 +328,15 @@ static NSDateFormatter *_lastActiveDateFormatter;
 
 - (void)setPasscodeEnabled:(BOOL)passcodeEnabled {
     NSError *error;
-    BOOL success = [SSKeychain setPassword:[NSString stringWithFormat:@"%@", @(passcodeEnabled)]
-                                forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                   account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_ENABLED
-                                     error:&error];
+    BOOL success = [SAMKeychain setPassword:[NSString stringWithFormat:@"%@", @(passcodeEnabled)]
+                                 forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_ENABLED
+                                      error:&error];
     
     if (success && !passcodeEnabled) {
-        success = [SSKeychain deletePasswordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                               account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
-                                                 error:&error];
+        success = [SAMKeychain deletePasswordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                                account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                  error:&error];
     }
     
     if (!success || error) {
@@ -346,9 +346,9 @@ static NSDateFormatter *_lastActiveDateFormatter;
 
 - (NSTimeInterval)passcodeTimeInterval {
     NSError *error;
-    NSString *value = [SSKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                             account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_INTERVAL
-                                               error:&error];
+    NSString *value = [SAMKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                              account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_INTERVAL
+                                                error:&error];
     
     if (error && error.code != errSecItemNotFound) {
         NSLog(@"Error determining passcode interval: %@", error);
@@ -363,10 +363,10 @@ static NSDateFormatter *_lastActiveDateFormatter;
 
 - (void)setPasscodeTimeInterval:(NSTimeInterval)passcodeTimeinterval {
     NSError *error;
-    BOOL success = [SSKeychain setPassword:[NSString stringWithFormat:@"%@", @(passcodeTimeinterval)]
-                                forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                   account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_INTERVAL
-                                     error:&error];
+    BOOL success = [SAMKeychain setPassword:[NSString stringWithFormat:@"%@", @(passcodeTimeinterval)]
+                                 forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TIME_INTERVAL
+                                      error:&error];
     
     if (!success || error) {
         NSLog(@"Error setting passcode time interval: %@", error);

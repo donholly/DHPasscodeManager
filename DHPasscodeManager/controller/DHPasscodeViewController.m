@@ -234,7 +234,7 @@
                                      CGRectGetMaxY(self.instructionsLabel.frame) + DH_PASSCODE_SPACING,
                                      DH_PASSCODE_DOT_SIZE,
                                      DH_PASSCODE_DOT_SIZE);
-
+    
     self.dotView1.frame = CGRectMake(self.view.frame.size.width/2 - DH_PASSCODE_DOT_SIZE - (0.5 * DH_PASSCODE_DOT_SPACING),
                                      CGRectGetMaxY(self.instructionsLabel.frame) + DH_PASSCODE_SPACING,
                                      DH_PASSCODE_DOT_SIZE,
@@ -251,7 +251,7 @@
                                      DH_PASSCODE_DOT_SIZE);
     
     // Layout the buttons
-
+    
     // Middle column
     self.passcodeButton2.frame = CGRectMake(self.view.center.x - DH_PASSCODE_BUTTON_SIZE/2,
                                             CGRectGetMaxY(self.dotView0.frame) + instructionsPadding,
@@ -306,7 +306,7 @@
 }
 
 - (void)presentTouchIdWithCompletionBlock:(void (^)(BOOL success, NSError *error))completionBlock {
-
+    
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
     LAContext *context = [[LAContext alloc] init];
     
@@ -337,7 +337,7 @@
 }
 
 - (void)setupSignals {
-
+    
     @weakify(self)
     
     RACSignal *typeSignal = RACObserve(self, type);
@@ -507,7 +507,7 @@
                     [tuple.first integerValue] == DHPasscodeViewControllerTypeRemove) {
                     
                     if ([tuple.first integerValue] == DHPasscodeViewControllerTypeAuthenticate) {
-
+                        
                         NSLog(@"Authenticated with passcode");
                         
                         if (self.completionBlock) {
@@ -519,9 +519,9 @@
                         NSLog(@"Disabling passcode");
                         
                         NSError *removePasscodeError;
-                        BOOL removed = [SSKeychain deletePasswordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
-                                                                      error:&removePasscodeError];
+                        BOOL removed = [SAMKeychain deletePasswordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                                                     account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                                       error:&removePasscodeError];
                         
                         if (removePasscodeError) {
                             NSLog(@"Error removing passcode: %@", removePasscodeError);
@@ -555,10 +555,10 @@
                     NSLog(@"Creating passcode");
                     
                     NSError *createPasscodeError;
-                    BOOL created = [SSKeychain setPassword:firstInput
-                                                forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                                   account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
-                                                     error:&createPasscodeError];
+                    BOOL created = [SAMKeychain setPassword:firstInput
+                                                 forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                      error:&createPasscodeError];
                     
                     if (createPasscodeError) {
                         NSLog(@"Error creating passcode: %@", createPasscodeError);
@@ -599,10 +599,10 @@
                     NSLog(@"Changing passcode");
                     
                     NSError *changePasscodeError;
-                    BOOL changed = [SSKeychain setPassword:secondInput
-                                                forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                                   account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
-                                                     error:&changePasscodeError];
+                    BOOL changed = [SAMKeychain setPassword:secondInput
+                                                 forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                      error:&changePasscodeError];
                     
                     if (changePasscodeError) {
                         NSLog(@"Error changing passcode: %@", changePasscodeError);
@@ -666,12 +666,12 @@
         [self.dotViews enumerateObjectsUsingBlock:^(DHPasscodeDotView *dotView, NSUInteger idx, BOOL *stop) {
             dotView.style = self.style;
         }];
-
+        
         [self.passcodeButtons enumerateObjectsUsingBlock:^(DHPasscodeButton *passcodeButton, NSUInteger idx, BOOL *stop) {
             passcodeButton.style = self.style;
         }];
     }
-
+    
     self.logoImageView.image = self.style.logoImage;
     
     self.cancelButton.titleLabel.font = self.style.cancelButtonTextFont;
@@ -719,11 +719,11 @@
 }
 
 - (NSString *)currentPasscodeString {
-
+    
     NSError *error = nil;
-    NSString *password = [SSKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                                account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
-                                                  error:&error];
+    NSString *password = [SAMKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                                 account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                   error:&error];
     
     if (error && [error code] != errSecItemNotFound) {
         NSLog(@"Error fetching passcode: %@", [error localizedDescription]);
@@ -757,7 +757,7 @@
 }
 
 - (NSMutableArray *)currentInput {
-
+    
     NSMutableArray *currentInput = self.firstInput;
     
     if (self.firstInput.count == DH_PASSCODE_LENGTH) {
@@ -786,7 +786,7 @@
             }
         }
     }
-
+    
     return lastInput;
 }
 

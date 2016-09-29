@@ -10,7 +10,7 @@
 
 #import "DHPasscodeManagerStyle.h"
 
-#import <SSKeychain/SSKeychain.h>
+#import <SAMKeychain/SAMKeychain.h>
 
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
 #import <LocalAuthentication/LocalAuthentication.h>
