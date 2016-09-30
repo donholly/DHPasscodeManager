@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "DHPasscodeManager"
-  s.author       = { "Don Holly" => "don.holly@gmail.com" }
+  s.author       = "Don Holly"
   s.version      = "0.9.6"
   s.summary      = "The easiest way to add a passcode and TouchID support to your iOS App."
   s.license      = { :type => 'MIT', :text => <<-LICENSE
@@ -23,8 +23,9 @@ Pod::Spec.new do |s|
                       THE SOFTWARE.
                       LICENSE
                   }
-  s.homepage     = "https://www.github.com/everalbum/DHPasscodeManager"
+  s.homepage     = "https://www.github.com/donholly/DHPasscodeManager"
   s.requires_arc = true
+  s.ios.deployment_target = "8.0"
 
   s.source       = { :git => "https://github.com/donholly/DHPasscodeManager.git" }
   s.source_files = "DHPasscodeManager/**/*.{h,m}"
