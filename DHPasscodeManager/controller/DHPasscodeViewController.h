@@ -28,6 +28,8 @@ typedef void (^DHPasscodeManagerViewControllerCompletionBlock)(DHPasscodeViewCon
 
 @interface DHPasscodeViewController : UIViewController
 
+- (instancetype)initWithManager:(DHPasscodeManager*)manager;
+
 @property (nonatomic, weak) DHPasscodeManager *passcodeManager;
 
 @property (nonatomic) DHPasscodeViewControllerType type;

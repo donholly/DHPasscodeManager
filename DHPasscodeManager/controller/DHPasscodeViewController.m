@@ -23,12 +23,9 @@
 
 #define DH_PASSCODE_SPACING          10.0f
 
-// Changing this would break things right now
-// TODO: support variable length passcodes one day?
-#define DH_PASSCODE_LENGTH           4
-#define DH_PASSCODE_DELIMITER        @"-"
-
 @interface DHPasscodeViewController ()
+@property (nonatomic, weak) DHPasscodeManager* manager;
+
 @property (nonatomic, strong) UIImageView *logoImageView;
 
 @property (nonatomic, strong) UILabel *instructionsLabel;
@@ -66,8 +63,9 @@
     [self removeStyleObservers];
 }
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+- (id)initWithManager:(DHPasscodeManager*)manager {
+    if (self = [super initWithNibName:nil bundle:nil]) {
+        self.manager = manager;
         
         // default to a verify passcode
         self.type = DHPasscodeViewControllerTypeAuthenticate;
@@ -312,7 +310,7 @@
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
     LAContext *context = [[LAContext alloc] init];
     
-    NSError *authError;
+    NSError *authError = nil;
     if ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:&authError]) {
         [context evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
                 localizedReason:NSLocalizedString(@"Unlock Access", @"Unlock Access")
@@ -352,10 +350,10 @@
        combineLatest:@[typeSignal, firstInputSignal, secondInputSignal, thirdInputSignal]
        reduce:^id (NSNumber *type, NSArray *firstInput, NSArray *secondInput, NSArray *thirdInput) {
            @strongify(self)
-           
+
            if (type.integerValue != DHPasscodeViewControllerTypeCreateNew &&
                firstInput.count == DH_PASSCODE_LENGTH &&
-               ![self passcodeEntryIsValid:firstInput]) {
+               ![self.manager validatePasscode:firstInput]) {
                return NSLocalizedString(@"Invalid passcode", @"Invalid passcode");
            }
            
@@ -478,19 +476,17 @@
         }
         
         // Input Validation
-        NSString *firstInput = [tuple.second componentsJoinedByString:DH_PASSCODE_DELIMITER];
-        NSString *secondInput = [tuple.third componentsJoinedByString:DH_PASSCODE_DELIMITER];
         BOOL firstInputIsValid = NO;
         
         if ([tuple.second count] == DH_PASSCODE_LENGTH) {
-            firstInputIsValid = [self passcodeEntryIsValid:tuple.second];
+            firstInputIsValid = [self.manager validatePasscode:tuple.second];
             if (!firstInputIsValid) {
                 if ([tuple.first integerValue] == DHPasscodeViewControllerTypeAuthenticate ||
                     [tuple.first integerValue] == DHPasscodeViewControllerTypeChangeExisting ||
                     [tuple.first integerValue] == DHPasscodeViewControllerTypeRemove) {
                     
                     // Bad password
-                    NSLog(@"Invalid passcode: %@ != %@", firstInput, self.currentPasscodeString);
+                    NSLog(@"Entered passcode does not match stored passcode");
                     
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
                     
@@ -520,15 +516,8 @@
                         
                         NSLog(@"Disabling passcode");
                         
-                        NSError *removePasscodeError;
-                        BOOL removed = [SAMKeychain deletePasswordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                                                     account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
-                                                                       error:&removePasscodeError];
-                        
-                        if (removePasscodeError) {
-                            NSLog(@"Error removing passcode: %@", removePasscodeError);
-                        }
-                        
+                        NSError *removePasscodeError = nil;
+                        BOOL removed = [self.manager deletePasscode:&removePasscodeError];
                         if (self.completionBlock) {
                             self.completionBlock(self, removed, removePasscodeError);
                         }
@@ -554,17 +543,8 @@
                 }];
                 
                 if (passcodesMatch) {
-                    NSLog(@"Creating passcode");
-                    
-                    NSError *createPasscodeError;
-                    BOOL created = [SAMKeychain setPassword:firstInput
-                                                 forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
-                                                      error:&createPasscodeError];
-                    
-                    if (createPasscodeError) {
-                        NSLog(@"Error creating passcode: %@", createPasscodeError);
-                    }
+                    NSError* createPasscodeError = nil;
+                    BOOL created = [self.manager setPasscode:tuple.second error:&createPasscodeError];
                     
                     if (self.completionBlock) {
                         self.completionBlock(self, created, createPasscodeError);
@@ -598,17 +578,8 @@
                 }];
                 
                 if (passcodesMatch) {
-                    NSLog(@"Changing passcode");
-                    
-                    NSError *changePasscodeError;
-                    BOOL changed = [SAMKeychain setPassword:secondInput
-                                                 forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
-                                                      error:&changePasscodeError];
-                    
-                    if (changePasscodeError) {
-                        NSLog(@"Error changing passcode: %@", changePasscodeError);
-                    }
+                    NSError *changePasscodeError = nil;
+                    BOOL changed = [self.manager setPasscode:tuple.third error:&changePasscodeError];
                     
                     if (self.completionBlock) {
                         self.completionBlock(self, changed, changePasscodeError);
@@ -640,18 +611,6 @@
             self.resignActiveImageView.hidden = YES;
         }
     }];
-}
-
-- (BOOL)passcodeEntryIsValid:(NSArray *)passcodeEntry {
-    
-    if (passcodeEntry.count != DH_PASSCODE_LENGTH) {
-        return NO;
-    }
-    
-    NSString *inputPasscode = [passcodeEntry componentsJoinedByString:DH_PASSCODE_DELIMITER];
-    NSString *currentPasscode = self.currentPasscodeString;
-    
-    return (currentPasscode && [inputPasscode isEqualToString:currentPasscode]);
 }
 
 - (void)setStyle:(DHPasscodeManagerStyle *)style {
@@ -720,28 +679,9 @@
     }];
 }
 
-- (NSString *)currentPasscodeString {
-    
-    NSError *error = nil;
-    NSString *password = [SAMKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                                 account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
-                                                   error:&error];
-    
-    if (error && [error code] != errSecItemNotFound) {
-        NSLog(@"Error fetching passcode: %@", [error localizedDescription]);
-    }
-    
-    return password;
-}
-
-- (NSArray *)currentPasscodeArray {
-    return [self.currentPasscodeString componentsSeparatedByString:DH_PASSCODE_DELIMITER];
-}
-
 - (void)setType:(DHPasscodeViewControllerType)type {
     
-    NSString *currentPasscode = self.currentPasscodeString;
-    if (!currentPasscode) {
+    if (!self.manager.passcodeExists) {
         if (type != DHPasscodeViewControllerTypeCreateNew) {
             if (self.type != DHPasscodeViewControllerTypeCreateNew) {
                 NSLog(@"No password is currently set! Changing mode to: DHPasscodeViewControllerTypeCreateNew");

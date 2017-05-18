@@ -20,6 +20,7 @@ static DHPasscodeManager *_sharedInstance;
 @property (nonatomic, strong) DHPasscodeViewController *passcodeViewController;
 @property (nonatomic) BOOL currentlyAuthenticated;
 @property (nonatomic) NSString *previousApplicationState;
+@property (readonly) NSString *passcode;
 @end
 
 static NSDateFormatter *_lastActiveDateFormatter;
@@ -56,7 +57,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
         
         self.style = [[DHPasscodeManagerStyle alloc] init];
         
-        self.passcodeViewController = [[DHPasscodeViewController alloc] init];
+        self.passcodeViewController = [[DHPasscodeViewController alloc] initWithManager:self];
         self.passcodeViewController.style = self.style;
         self.passcodeViewController.passcodeManager = self;
         
@@ -294,19 +295,6 @@ static NSDateFormatter *_lastActiveDateFormatter;
     }
 }
 
-- (BOOL)isPasscodeStored {
-    NSError *error = nil;
-    NSString *passcode = [SAMKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                                 account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
-                                                   error:&error];
-    
-    if (error && [error code] != errSecItemNotFound) {
-        NSLog(@"Error fetching passcode from keychain: %@", [error localizedDescription]);
-    }
-    
-    return passcode != nil;
-}
-
 - (BOOL)passcodeEnabled {
     NSError *error;
     NSString *value = [SAMKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
@@ -321,7 +309,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
         value = [NSString stringWithFormat:@"%@", DH_PASSCODE_ENABLED_DEFAULT];
     }
     
-    BOOL enabled = [value boolValue] && [self isPasscodeStored];
+    BOOL enabled = [value boolValue] && [self passcodeExists];
     
     return enabled;
 }
@@ -334,9 +322,7 @@ static NSDateFormatter *_lastActiveDateFormatter;
                                       error:&error];
     
     if (success && !passcodeEnabled) {
-        success = [SAMKeychain deletePasswordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
-                                                account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
-                                                  error:&error];
+        success = [self deletePasscode:&error];
     }
     
     if (!success || error) {
@@ -373,7 +359,66 @@ static NSDateFormatter *_lastActiveDateFormatter;
     }
 }
 
-#pragma mark - Passcode Manipulation -
+#pragma mark - Passcode Management -
+
+// For internal use only!
+- (NSString*)passcode {
+    NSError *error = nil;
+    NSString *storedPasscode = [SAMKeychain passwordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                                       account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                         error:&error];
+    
+    if (error && [error code] != errSecItemNotFound) {
+        NSLog(@"Error fetching passcode: %@", [error localizedDescription]);
+    }
+    
+    return storedPasscode;
+}
+
+- (NSString*)stringifyPasscode:(Passcode*)passcode {
+    return [passcode componentsJoinedByString:DH_PASSCODE_DELIMITER];
+}
+
+- (BOOL)passcodeExists {
+    NSString* passcode = self.passcode;
+    return passcode != nil && passcode.length > 0;
+}
+
+- (BOOL)validatePasscode:(Passcode *)passcode {
+    return [[self stringifyPasscode: passcode] isEqualToString:self.passcode];
+}
+
+- (BOOL)setPasscode:(Passcode *)passcode error:(NSError *__autoreleasing *)errorRef {
+    NSLog(@"Setting passcode");
+    
+    NSError *createPasscodeError;
+    BOOL created = [SAMKeychain setPassword:[self stringifyPasscode: passcode]
+                                 forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                    account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                      error:errorRef];
+    
+    if (*errorRef) {
+        NSLog(@"Error setting passcode: %@", *errorRef);
+    }
+    
+    return created;
+}
+
+- (BOOL)deletePasscode:(NSError**)errorRef {
+    NSLog(@"Disabling passcode");
+    
+    BOOL removed = [SAMKeychain deletePasswordForService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
+                                                 account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
+                                                   error:errorRef];
+    
+    if (*errorRef) {
+        NSLog(@"Error removing passcode: %@", *errorRef);
+    }
+    
+    return removed;
+}
+
+#pragma mark - Passcode UI Presentation -
 
 - (void)showApplicationCovers:(BOOL)animated
               completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock {
