@@ -28,7 +28,13 @@
 
 #define DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_TOUCHID_ENABLED                         @"DHPasscodeManager_touchid_enabled"
 
+// Changing this would break things right now
+// TODO: support variable length passcodes one day?
+#define DH_PASSCODE_LENGTH           4
+#define DH_PASSCODE_DELIMITER        @"-"
+
 typedef void (^DHPasscodeManagerCompletionBlock)(BOOL success, NSError *error);
+typedef NSArray<NSNumber*> Passcode;
 
 @interface DHPasscodeManager : NSObject
 
@@ -72,7 +78,14 @@ typedef void (^DHPasscodeManagerCompletionBlock)(BOOL success, NSError *error);
 - (void)authenticateUserAnimated:(BOOL)animated
                  completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock;
 
-// Passcode management methods (Add / Change / Remove)
+// Passcode management
+@property (readonly) BOOL passcodeExists;
+- (BOOL)validatePasscode:(Passcode*)passcode;
+- (BOOL)setPasscode:(Passcode*)passcode error:(NSError**)error;
+- (BOOL)deletePasscode:(NSError**)error;
+
+
+// Display UI for passcode management
 
 - (void)createPasscodeAnimated:(BOOL)animated
                completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock;
