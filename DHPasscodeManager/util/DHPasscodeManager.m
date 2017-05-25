@@ -391,7 +391,6 @@ static NSDateFormatter *_lastActiveDateFormatter;
 - (BOOL)setPasscode:(Passcode *)passcode error:(NSError *__autoreleasing *)errorRef {
     NSLog(@"Setting passcode");
     
-    NSError *createPasscodeError;
     BOOL created = [SAMKeychain setPassword:[self stringifyPasscode: passcode]
                                  forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
                                     account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE

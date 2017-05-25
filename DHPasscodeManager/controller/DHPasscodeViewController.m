@@ -80,7 +80,7 @@
     return self;
 }
 
-- (NSUInteger)supportedInterfaceOrientations {
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     return ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone
             ? UIInterfaceOrientationMaskPortrait
             : UIInterfaceOrientationMaskAll);
