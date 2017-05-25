@@ -595,4 +595,37 @@ static NSDateFormatter *_lastActiveDateFormatter;
                      }];
 }
 
+#pragma mark - Present Touch ID Challenge -
+
+- (void)presentTouchIDChallengeWithReason:(NSString*)reason completionBlock:(void (^)(BOOL success, NSError *error))completionBlock {
+    
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
+    LAContext *context = [[LAContext alloc] init];
+    
+    NSError *authError = nil;
+    if ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:&authError]) {
+        [context evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
+                localizedReason:reason
+                          reply:^(BOOL success, NSError *error) {
+                              dispatch_async(dispatch_get_main_queue(), ^{
+                                  if (completionBlock) {
+                                      completionBlock(success, error);
+                                  }
+                              });
+                          }];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (completionBlock) {
+                completionBlock(NO, authError);
+            }
+        });
+    }
+    
+#else
+    if (completionBlock) {
+        completionBlock(NO);
+    }
+#endif
+}
+
 @end

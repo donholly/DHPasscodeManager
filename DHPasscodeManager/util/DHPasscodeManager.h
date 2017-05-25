@@ -96,4 +96,8 @@ typedef NSArray<NSNumber*> Passcode;
 - (void)disablePasscodeAnimated:(BOOL)animated
                 completionBlock:(DHPasscodeManagerCompletionBlock)completionBlock;
 
+// Present Touch ID Challenge
+
+- (void)presentTouchIDChallengeWithReason:(NSString*)reason completionBlock:(void (^)(BOOL success, NSError *error))completionBlock;
+
 @end
