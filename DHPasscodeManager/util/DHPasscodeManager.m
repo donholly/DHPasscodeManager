@@ -391,7 +391,6 @@ static NSDateFormatter *_lastActiveDateFormatter;
 - (BOOL)setPasscode:(Passcode *)passcode error:(NSError *__autoreleasing *)errorRef {
     NSLog(@"Setting passcode");
     
-    NSError *createPasscodeError;
     BOOL created = [SAMKeychain setPassword:[self stringifyPasscode: passcode]
                                  forService:DH_PASSCODE_KEYCHAIN_SERVICE_NAME
                                     account:DH_PASSCODE_KEYCHAIN_ACCOUNT_NAME_PASSCODE
@@ -593,6 +592,39 @@ static NSDateFormatter *_lastActiveDateFormatter;
                      completion:^(BOOL finished) {
                          self.window.hidden = YES;
                      }];
+}
+
+#pragma mark - Present Touch ID Challenge -
+
+- (void)presentTouchIDChallengeWithReason:(NSString*)reason completionBlock:(void (^)(BOOL success, NSError *error))completionBlock {
+    
+#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
+    LAContext *context = [[LAContext alloc] init];
+    
+    NSError *authError = nil;
+    if ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:&authError]) {
+        [context evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
+                localizedReason:reason
+                          reply:^(BOOL success, NSError *error) {
+                              dispatch_async(dispatch_get_main_queue(), ^{
+                                  if (completionBlock) {
+                                      completionBlock(success, error);
+                                  }
+                              });
+                          }];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (completionBlock) {
+                completionBlock(NO, authError);
+            }
+        });
+    }
+    
+#else
+    if (completionBlock) {
+        completionBlock(NO);
+    }
+#endif
 }
 
 @end

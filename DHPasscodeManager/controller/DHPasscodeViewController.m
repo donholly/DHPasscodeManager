@@ -80,7 +80,7 @@
     return self;
 }
 
-- (NSUInteger)supportedInterfaceOrientations {
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     return ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone
             ? UIInterfaceOrientationMaskPortrait
             : UIInterfaceOrientationMaskAll);
@@ -187,7 +187,7 @@
 - (void)viewControllerWasDisplayed {
     if (self.type == DHPasscodeViewControllerTypeAuthenticate && self.passcodeManager.touchIDEnabled) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self presentTouchIdWithCompletionBlock:^(BOOL success, NSError *error) {
+            [self.passcodeManager presentTouchIDChallengeWithReason:NSLocalizedString(@"Unlock Access", @"Unlock Access") completionBlock:^(BOOL success, NSError *error) {
                 if (self.completionBlock) {
                     self.completionBlock(self, success, error);
                 }
@@ -303,37 +303,6 @@
                                          self.passcodeButton0.frame.origin.y,
                                          DH_PASSCODE_BUTTON_SIZE,
                                          DH_PASSCODE_BUTTON_SIZE);
-}
-
-- (void)presentTouchIdWithCompletionBlock:(void (^)(BOOL success, NSError *error))completionBlock {
-    
-#if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
-    LAContext *context = [[LAContext alloc] init];
-    
-    NSError *authError = nil;
-    if ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:&authError]) {
-        [context evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
-                localizedReason:NSLocalizedString(@"Unlock Access", @"Unlock Access")
-                          reply:^(BOOL success, NSError *error) {
-                              dispatch_async(dispatch_get_main_queue(), ^{
-                                  if (completionBlock) {
-                                      completionBlock(success, error);
-                                  }
-                              });
-                          }];
-    } else {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (completionBlock) {
-                completionBlock(NO, authError);
-            }
-        });
-    }
-    
-#else
-    if (completionBlock) {
-        completionBlock(NO);
-    }
-#endif
 }
 
 - (void)setupSignals {
