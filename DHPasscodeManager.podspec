@@ -35,6 +35,6 @@ Pod::Spec.new do |s|
 
   s.framework    = 'LocalAuthentication'
 
-  s.xcconfig = { 'OTHER_LDFLAGS' => '-ObjC -all_load' }
+  s.xcconfig = { 'OTHER_LDFLAGS' => '-ObjC' }
 
 end
